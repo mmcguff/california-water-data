@@ -1,0 +1,104 @@
+{
+    "Data": {
+        "Providers": [
+            {
+                "Name": "cimis",
+                "Type": "station",
+                "Owner": "water.ca.gov",
+                "Records": [
+                    {
+                        "Date": "2019-04-04",
+                        "Julian": "94",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.17",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-05",
+                        "Julian": "95",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.2",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-06",
+                        "Julian": "96",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.15",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-07",
+                        "Julian": "97",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.21",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-08",
+                        "Julian": "98",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.19",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-09",
+                        "Julian": "99",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.18",
+                            "Qc": "H",
+                            "Unit": "(in)"
+                        }
+                    },
+                    {
+                        "Date": "2019-04-10",
+                        "Julian": "100",
+                        "Station": "250",
+                        "Standard": "english",
+                        "ZipCodes": "95987, 95955, 95932, 95912",
+                        "Scope": "daily",
+                        "DayEto": {
+                            "Value": "0.16",
+                            "Qc": "A",
+                            "Unit": "(in)"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
