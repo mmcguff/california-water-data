@@ -3,35 +3,40 @@ const cors = require('cors');
 const rp = require('request-promise');
 const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
+let moment = require('moment');
+moment().format();
 const app = express();
 
 const calTestPayload = require('./cal-test.json');
 
+
+
 app.use(cors());
 app.use(morgan('combined'));
 
-app.get('/californiaWaterData', async function(req, res){
-    const API_KEY = '2298ecc1-317c-4f19-a8d0-948ca1ae719f';
-	let baseurl = 'http://et.water.ca.gov/api/data';
 
-	// return fetch(baseurl 
-	// + "?appKey=" + API_KEY 
-	// + "&targets=" + targets 
-	// + "&startDate=" + startDate
-	// + "&endDate=" + endDate
-	// + "&dataItems=day-eto" , 
-	// {method: 'get'})
-	// .then(function(response) {
-	// return response.text();
-    // });
+function getTime(){
+	const today = moment().utcOffset(-8).format('YYYY-MM-DD');
+	const sixDaysAgo = moment().utcOffset(-8).subtract(6, 'days').format('YYYY-M-DD');
+	return {today, sixDaysAgo};
+}
+
+app.get('/californiaWaterData/:target', async function(req, res){
+    const target = req.params.target;
+    const startDate = getTime().sixDaysAgo;
+    const endDate = getTime().today;
+    const API_KEY = '2298ecc1-317c-4f19-a8d0-948ca1ae719f';
+    const uri = 'http://et.water.ca.gov/api/data'
+    + '?appKey=' + API_KEY 
+	+ '&targets=' + target 
+	+ '&startDate=' + startDate
+	+ '&endDate=' + endDate
+	+ '&dataItems=day-eto';
     
-    /*
     let options = {
-        uri: uri,
+        uri,
         headers: {
-            'Accept': 'application/json',
-            'Authorization': hmac_str,
-            'Request-Date': timestamp
+            'Accept': 'application/json'
         },
         json: true 
     };
@@ -44,10 +49,8 @@ app.get('/californiaWaterData', async function(req, res){
             console.log(err);
             res.send(err);
         });
-        */
 
-    res.send(calTestPayload);
-})
+});
 
 
 app.get('/fieldClimateData', async function(req, res){
