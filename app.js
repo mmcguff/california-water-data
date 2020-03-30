@@ -88,7 +88,7 @@ app.get('/ranchSystems/:days', async (req, res) => {
     const username = process.env.RANCH_SYSTEMS_USERNAME;
     const password = process.env.RANCH_SYSTEMS_PASSWORD;
     const requestType = 'data';
-    const rmsids = ['227985','227986','227987','227988','227989','227990'];
+    const rmsids = ['227985','227986','227987','227988','227989','227990', '227975'];
     const to = new Date().getTime();
     const from = to - req.params.days * 24 * 60 * 60 * 1000
 
