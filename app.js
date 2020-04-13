@@ -4,6 +4,7 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
 const app = express();
 let moment = require('moment');
 moment().format();
@@ -23,6 +24,7 @@ const utils = require('./helper/utils');
 
 app.use(cors());
 app.use(morgan('dev'));
+app.use(bodyParser.json());
 
 app.get('/californiaWaterData/:target', async (req, res) => {
     
@@ -82,8 +84,18 @@ app.get('/fieldClimateData', async (req, res) => {
 
 app.get('/ranchSystems/:days', async (req, res) => {
 
+    console.log();
+
     const requestType = 'data';
-    const rmsids = ['227985','227986','227987','227988','227989','227990', '227975'];
+    const rmsids = [
+        req.body._4inProbeId,
+        req.body._12inProbeId,
+        req.body._24inProbeId,
+        req.body._36inProbeId,
+        req.body._48inProbeId,
+        req.body._60inProbeId, 
+        req.body._0To100PSIProbeId
+    ];
     const to = new Date().getTime();
     const from = to - req.params.days * 24 * 60 * 60 * 1000
     const uri = `${RANCH_SYSTEMS_BASEURL}/rsapp15/jsp/rsjson.jsp?uname=${RANCH_SYSTEMS_USERNAME}&pword=${RANCH_SYSTEMS_PASSWORD}&reqtype=${requestType}&rmsids=${rmsids.join(',')}&from=${from}&to=${to}`; 
@@ -91,8 +103,7 @@ app.get('/ranchSystems/:days', async (req, res) => {
     await fetch(uri)
     .then(response => response.json())
     .then(data => {
-        //res.send(data);
-        res.send(utils.ranchSystemsTransform(data));
+        res.send(utils.ranchSystemsTransform(data, req.body));
     })
     .catch(err => {
         console.log(err);

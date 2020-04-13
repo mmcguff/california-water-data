@@ -9,7 +9,7 @@ internals.getTime = () => {
     return {today, sixDaysAgo};
 }
 
-internals.ranchSystemsTransform = sourcePayload => {
+internals.ranchSystemsTransform = (sourcePayload, rb) => {
     
     const targetDateStringFormat = 'YYYY/MM/DD hh:mm:ss';
     const targetTimeStringFormat = 'h:mm a';
@@ -17,13 +17,13 @@ internals.ranchSystemsTransform = sourcePayload => {
 
     let transformedPayload = [];
 
-    const _4inProbeId = 227985;
-    const _12inProbeId = 227986;
-    const _24inProbeId = 227987;
-    const _36inProbeId = 227988;
-    const _48inProbeId = 227989;
-    const _60inProbeId = 227990;
-    const _pressueId = 227975;
+    const _4inProbeId =  rb._4inProbeId;
+    const _12inProbeId = rb._12inProbeId;
+    const _24inProbeId = rb._24inProbeId;
+    const _36inProbeId = rb._36inProbeId;
+    const _48inProbeId = rb._48inProbeId;
+    const _60inProbeId = rb._60inProbeId;
+    const _0To100PSIProbeId = rb._0To100PSIProbeId;
 
     const _4inProbeIndexLocation = _.findIndex(data, ['id', _4inProbeId]);
     const _12inProbeIndexLocation = _.findIndex(data, ['id', _12inProbeId]);
@@ -31,13 +31,9 @@ internals.ranchSystemsTransform = sourcePayload => {
     const _36inProbeIndexLocation = _.findIndex(data, ['id', _36inProbeId]);
     const _48inProbeIndexLocation = _.findIndex(data, ['id', _48inProbeId]);
     const _60inProbeIndexLocation = _.findIndex(data, ['id', _60inProbeId]);
-    const _pressureLocation = _.findIndex(data, [ 'id',  _pressueId]);
-
-    let pressure;
+    const _0To100PSIProbeIndexLocation = _.findIndex(data, [ 'id',  _0To100PSIProbeId]);
 
     for (let i = 0; i < data[_4inProbeIndexLocation].rmsdata.length; i++) {
-
-        pressure = (i < 15199) ? data[_pressureLocation].rmsdata[i].y : 0;
 
         transformedPayload.push({
             "date": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetDateStringFormat),
@@ -48,7 +44,7 @@ internals.ranchSystemsTransform = sourcePayload => {
             "36_in_soil_moisture": data[_36inProbeIndexLocation].rmsdata[i].y,
             "48_in_soil_moisture": data[_48inProbeIndexLocation].rmsdata[i].y,
             "60_in_soil_moisture": data[_60inProbeIndexLocation].rmsdata[i].y,
-            "Pressure_0-100psi": pressure
+            "Pressure_0-100psi": data[_0To100PSIProbeIndexLocation].rmsdata[i].y
         })
     }
     return transformedPayload;
