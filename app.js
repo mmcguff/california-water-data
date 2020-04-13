@@ -91,6 +91,7 @@ app.get('/ranchSystems/:days', async (req, res) => {
     await fetch(uri)
     .then(response => response.json())
     .then(data => {
+        //res.send(data);
         res.send(utils.ranchSystemsTransform(data));
     })
     .catch(err => {

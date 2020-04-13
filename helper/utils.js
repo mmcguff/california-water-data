@@ -33,17 +33,22 @@ internals.ranchSystemsTransform = sourcePayload => {
     const _60inProbeIndexLocation = _.findIndex(data, ['id', _60inProbeId]);
     const _pressureLocation = _.findIndex(data, [ 'id',  _pressueId]);
 
+    let pressure;
+
     for (let i = 0; i < data[_4inProbeIndexLocation].rmsdata.length; i++) {
+
+        pressure = (i < 15199) ? data[_pressureLocation].rmsdata[i].y : 0;
+
         transformedPayload.push({
             "date": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetDateStringFormat),
             "10_X_X_4_time": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetTimeStringFormat),
             "4_in_soil_moisture": data[_4inProbeIndexLocation].rmsdata[i].y,
-            "8_in_soil_moisture": data[_12inProbeIndexLocation].rmsdata[i].y,
+            "12_in_soil_moisture": data[_12inProbeIndexLocation].rmsdata[i].y,
             "24_in_soil_moisture": data[_24inProbeIndexLocation].rmsdata[i].y,
             "36_in_soil_moisture": data[_36inProbeIndexLocation].rmsdata[i].y,
             "48_in_soil_moisture": data[_48inProbeIndexLocation].rmsdata[i].y,
             "60_in_soil_moisture": data[_60inProbeIndexLocation].rmsdata[i].y,
-            "Pressure_0-100psi": data[_pressureLocation].rmsdata[i].y
+            "Pressure_0-100psi": pressure
         })
     }
     return transformedPayload;
