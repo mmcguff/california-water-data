@@ -82,7 +82,7 @@ app.get('/fieldClimateData', async (req, res) => {
         })
 });
 
-app.get('/ranchSystems/:days', async (req, res) => {
+app.all('/ranchSystems/:days', async (req, res) => {
 
     console.log();
 
