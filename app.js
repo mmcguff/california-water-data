@@ -16,8 +16,6 @@ const FIELD_CLIMATE_BASEURL = process.env.FIELD_CLIMATE_BASEURL;
 const FIELD_CLIMATE_PUBLIC_KEY = process.env.FIELD_CLIMATE_PUBLIC_APIKEY;
 const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
 const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
-const RANCH_SYSTEMS_USERNAME = process.env.RANCH_SYSTEMS_USERNAME;
-const RANCH_SYSTEMS_PASSWORD = process.env.RANCH_SYSTEMS_PASSWORD;
 
 //custom utlis
 const utils = require('./helper/utils');
@@ -84,7 +82,12 @@ app.get('/fieldClimateData', async (req, res) => {
 
 app.all('/ranchSystems/:days', async (req, res) => {
 
-    console.log();
+   let RANCH_SYSTEMS_USERNAME =  req.headers.username || '';
+   let RANCH_SYSTEMS_PASSWORD = req.headers.password || '';
+
+   if(!RANCH_SYSTEMS_USERNAME || !RANCH_SYSTEMS_PASSWORD){
+       return res.status(401).send("Missing username or password in header");
+   }
 
     const requestType = 'data';
     const rmsids = [
