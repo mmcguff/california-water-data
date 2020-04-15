@@ -1,91 +1,117 @@
+//package dependencies
 const express = require('express');
 const cors = require('cors');
-const rp = require('request-promise');
+const fetch = require('node-fetch');
 const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+const app = express();
 let moment = require('moment');
 moment().format();
-const app = express();
 
-const calTestPayload = require('./cal-test.json');
+//env
+const CAL_WATER_BASEURL = process.env.CAL_WATER_BASEURL;
+const CAL_WATER_APIKEY = process.env.CAL_WATER_APIKEY;
+const FIELD_CLIMATE_BASEURL = process.env.FIELD_CLIMATE_BASEURL;
+const FIELD_CLIMATE_PUBLIC_KEY = process.env.FIELD_CLIMATE_PUBLIC_APIKEY;
+const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
+const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
 
-
+//custom utlis
+const utils = require('./helper/utils');
 
 app.use(cors());
-app.use(morgan('combined'));
+app.use(morgan('dev'));
+app.use(bodyParser.json());
 
-
-function getTime(){
-	const today = moment().utcOffset(-8).format('YYYY-MM-DD');
-	const sixDaysAgo = moment().utcOffset(-8).subtract(6, 'days').format('YYYY-M-DD');
-	return {today, sixDaysAgo};
-}
-
-app.get('/californiaWaterData/:target', async function(req, res){
-    const target = req.params.target;
-    const startDate = getTime().sixDaysAgo;
-    const endDate = getTime().today;
-    const API_KEY = '2298ecc1-317c-4f19-a8d0-948ca1ae719f';
-    const uri = 'http://et.water.ca.gov/api/data'
-    + '?appKey=' + API_KEY 
-	+ '&targets=' + target 
-	+ '&startDate=' + startDate
-	+ '&endDate=' + endDate
-	+ '&dataItems=day-eto';
+app.get('/californiaWaterData/:target', async (req, res) => {
     
-    let options = {
-        uri,
-        headers: {
-            'Accept': 'application/json'
-        },
-        json: true 
-    };
-     
-    rp(options)
-        .then(function (payload) {
-            res.send(payload);
-        })
-        .catch(function (err) {
-            console.log(err);
-            res.send(err);
-        });
+    const target = req.params.target;
+    const startDate = utils.getTime().sixDaysAgo;
+    const endDate = utils.getTime().today;
+    const uri = `${CAL_WATER_BASEURL}?appKey=${CAL_WATER_APIKEY}&targets=${target}&startDate=${startDate}&endDate=${endDate}&dataItems=day-eto`;
 
+    const options = {
+        headers: {
+            'Accept': '*/*'
+        }
+    };
+
+    await fetch(uri, options)
+    .then(response => response.json())
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        console.log(err);
+        res.send(err);
+    })
 });
 
+app.get('/fieldClimateData', async (req, res) => {
 
-app.get('/fieldClimateData', async function(req, res){
-
-    const public_key = '8e0037389c697e256700b56601738ee7cf2de70e';
-    const private_key = '9bb981cba1243576de45e917d892c7106abf2250';
     const timestamp = new Date().toUTCString(); 
-
     const stationCode = '002047A7';
     const method = 'GET';
     const request = `/data/normal/${stationCode}/hourly/last/21d`;
-    const uri = `https://api.fieldclimate.com/v1/data/normal/${stationCode}/hourly/last/21d`
+    const uri = `${FIELD_CLIMATE_BASEURL}/${stationCode}/hourly/last/21d`
 
-    const content_to_sign = method + request + timestamp + public_key;
-    let signature = CryptoJS.HmacSHA256(content_to_sign, private_key);
-    const hmac_str = "hmac " + public_key + ":" + signature;
+    const content_to_sign = method + request + timestamp + FIELD_CLIMATE_PUBLIC_KEY;
+    let signature = CryptoJS.HmacSHA256(content_to_sign, FIELD_CLIMATE_PRIVATE_KEY);
+    const hmac_str = "hmac " + FIELD_CLIMATE_PUBLIC_KEY + ":" + signature;
 
-        let options = {
-            uri,
+        const options = {
+            method,
             headers: {
                 'Accept': 'application/json',
                 'Authorization': hmac_str,
                 'Request-Date': timestamp
-            },
-            json: true 
-        };
-         
-        rp(options)
-            .then(function (payload) {
-                res.send(payload);
-            })
-            .catch(function (err) {
-                console.log(err);
-                res.send(err);
-            });
+            }
+        }
+
+        await fetch(uri, options)
+        .then(response => response.json())
+        .then(data => {
+            res.send(data);
+        })
+        .catch(err => {
+            console.log(err);
+            res.send(err);
+        })
+});
+
+app.all('/ranchSystems/:days', async (req, res) => {
+
+   let RANCH_SYSTEMS_USERNAME =  req.headers.username || '';
+   let RANCH_SYSTEMS_PASSWORD = req.headers.password || '';
+
+   if(!RANCH_SYSTEMS_USERNAME || !RANCH_SYSTEMS_PASSWORD){
+       return res.status(401).send("Missing username or password in header");
+   }
+
+    const requestType = 'data';
+    const rmsids = [
+        req.body._4inProbeId,
+        req.body._12inProbeId,
+        req.body._24inProbeId,
+        req.body._36inProbeId,
+        req.body._48inProbeId,
+        req.body._60inProbeId, 
+        req.body._0To100PSIProbeId
+    ];
+    const to = new Date().getTime();
+    const from = to - req.params.days * 24 * 60 * 60 * 1000
+    const uri = `${RANCH_SYSTEMS_BASEURL}/rsapp15/jsp/rsjson.jsp?uname=${RANCH_SYSTEMS_USERNAME}&pword=${RANCH_SYSTEMS_PASSWORD}&reqtype=${requestType}&rmsids=${rmsids.join(',')}&from=${from}&to=${to}`; 
+    
+    await fetch(uri)
+    .then(response => response.json())
+    .then(data => {
+        res.send(utils.ranchSystemsTransform(data, req.body));
+    })
+    .catch(err => {
+        console.log(err);
+        res.send(err);
+    })
 });
 
 const port = process.env.PORT || 3000;
