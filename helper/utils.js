@@ -32,8 +32,20 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     const _48inProbeIndexLocation = _.findIndex(data, ['id', _48inProbeId]);
     const _60inProbeIndexLocation = _.findIndex(data, ['id', _60inProbeId]);
     const _0To100PSIProbeIndexLocation = _.findIndex(data, [ 'id',  _0To100PSIProbeId]);
+    
+    const arrIndexLengths = [
+        data[_4inProbeIndexLocation].rmsdata.length, 
+        data[_12inProbeIndexLocation].rmsdata.length, 
+        data[_24inProbeIndexLocation].rmsdata.length, 
+        data[_36inProbeIndexLocation].rmsdata.length, 
+        data[_48inProbeIndexLocation].rmsdata.length, 
+        data[_60inProbeIndexLocation].rmsdata.length, 
+        data[_0To100PSIProbeIndexLocation].rmsdata.length
+    ];
+    
+    const minCommonLength = Math.min(...arrIndexLengths);
 
-    for (let i = 0; i < data[_4inProbeIndexLocation].rmsdata.length; i++) {
+    for (let i = 0; i < minCommonLength; i++) {
 
         transformedPayload.push({
             "date": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetDateStringFormat),
