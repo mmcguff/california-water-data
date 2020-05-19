@@ -4,7 +4,9 @@
   "description": "This api will get data from several api engines and serve it to a frontend in order to avoid CORS issue of getting resources in a browser.",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -r dotenv/config app.js"
+    "start": "nodemon -r dotenv/config app.js",
+    "getJainLogicData": "node -r dotenv/config getJainLogicData.js",
+    "getJain": "node getJainLogicData.js"
   },
   "author": "Matthew McGuff",
   "license": "ISC",
