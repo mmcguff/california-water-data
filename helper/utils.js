@@ -1,23 +1,32 @@
-const internals = {};
+//package dependencies
 const _ = require('lodash');
+const path = require('path');
+const util = require('util');
+const fs = require('fs');
 let moment = require('moment');
 moment().format();
 
-internals.getTime = () => {
+//custom configuration
+const jainLogicDownloadPath = path.join(__dirname, '../jainLogicData');
+const internals = {};
+
+//califorinaWaterData
+internals.calWaterDataGetTime = () => {
     const today = moment().utcOffset(-8).format('YYYY-MM-DD');
     const sixDaysAgo = moment().utcOffset(-8).subtract(6, 'days').format('YYYY-M-DD');
-    return {today, sixDaysAgo};
+    return { today, sixDaysAgo };
 }
 
+//ranchSystems
 internals.ranchSystemsTransform = (sourcePayload, rb) => {
-    
+
     const targetDateStringFormat = 'YYYY/MM/DD hh:mm:ss';
     const targetTimeStringFormat = 'h:mm a';
     const data = sourcePayload.data;
 
     let transformedPayload = [];
 
-    const _4inProbeId =  rb._4inProbeId;
+    const _4inProbeId = rb._4inProbeId;
     const _12inProbeId = rb._12inProbeId;
     const _24inProbeId = rb._24inProbeId;
     const _36inProbeId = rb._36inProbeId;
@@ -31,18 +40,18 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     const _36inProbeIndexLocation = _.findIndex(data, ['id', _36inProbeId]);
     const _48inProbeIndexLocation = _.findIndex(data, ['id', _48inProbeId]);
     const _60inProbeIndexLocation = _.findIndex(data, ['id', _60inProbeId]);
-    const _0To100PSIProbeIndexLocation = _.findIndex(data, [ 'id',  _0To100PSIProbeId]);
-    
+    const _0To100PSIProbeIndexLocation = _.findIndex(data, ['id', _0To100PSIProbeId]);
+
     const arrIndexLengths = [
-        data[_4inProbeIndexLocation].rmsdata.length, 
-        data[_12inProbeIndexLocation].rmsdata.length, 
-        data[_24inProbeIndexLocation].rmsdata.length, 
-        data[_36inProbeIndexLocation].rmsdata.length, 
-        data[_48inProbeIndexLocation].rmsdata.length, 
-        data[_60inProbeIndexLocation].rmsdata.length, 
+        data[_4inProbeIndexLocation].rmsdata.length,
+        data[_12inProbeIndexLocation].rmsdata.length,
+        data[_24inProbeIndexLocation].rmsdata.length,
+        data[_36inProbeIndexLocation].rmsdata.length,
+        data[_48inProbeIndexLocation].rmsdata.length,
+        data[_60inProbeIndexLocation].rmsdata.length,
         data[_0To100PSIProbeIndexLocation].rmsdata.length
     ];
-    
+
     const minCommonLength = Math.min(...arrIndexLengths);
 
     for (let i = 0; i < minCommonLength; i++) {
@@ -60,6 +69,54 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
         })
     }
     return transformedPayload;
-} 
+}
+
+//jainLogic
+async function jainLogicDownload(page, f) {
+    await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: jainLogicDownloadPath,
+    });
+
+    await f();
+
+    console.error('Downloading...');
+    let fileName;
+    while (!fileName || fileName.endsWith('.crdownload')) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
+    }
+
+    const filePath = path.resolve(jainLogicDownloadPath, fileName);
+    console.error('Downloaded file:', filePath);
+    return filePath;
+}
+
+internals.jainLogicGetCsv = async (browser, page) => {
+    try {
+        const pathToCsvData = await jainLogicDownload(page, async () =>
+            await page.click('#DownloadDataSpan')
+        );
+
+        const { size } = await util.promisify(fs.stat)(pathToCsvData);
+        console.log(pathToCsvData, `${size}B`);
+    } finally {
+        return;
+    }
+}
+
+internals.jainLogicDeleteCurrentCsvData = async () => {
+    fs.readdir(jainLogicDownloadPath, function (err, items) {
+        if (err) return console.log(err);
+
+        items = items.filter(item => item !== 'debugging');
+
+        items.forEach(file => {
+            fs.unlink(path.resolve(__dirname, '../jainLogicData', file), (err) => {
+                if (err) return console.log(err);
+            })
+        });
+    });
+}
 
 module.exports = internals;

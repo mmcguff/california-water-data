@@ -27,8 +27,8 @@ app.use(bodyParser.json());
 app.get('/californiaWaterData/:target', async (req, res) => {
     
     const target = req.params.target;
-    const startDate = utils.getTime().sixDaysAgo;
-    const endDate = utils.getTime().today;
+    const startDate = utils.calWaterDataGetTime().sixDaysAgo;
+    const endDate = utils.calWaterDataGetTime().today;
     const uri = `${CAL_WATER_BASEURL}?appKey=${CAL_WATER_APIKEY}&targets=${target}&startDate=${startDate}&endDate=${endDate}&dataItems=day-eto`;
 
     const options = {
