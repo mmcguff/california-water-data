@@ -20,6 +20,9 @@ const FIELD_CLIMATE_PUBLIC_KEY = process.env.FIELD_CLIMATE_PUBLIC_APIKEY;
 const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
 const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
 
+//middleware
+const getTargetCSVFromLocation = require('./middleware/getTargetCSVFromLocation');
+
 //custom utlis
 const utils = require('./helper/utils');
 
@@ -117,8 +120,9 @@ app.all('/ranchSystems/:days', async (req, res) => {
     })
 });
 
-app.get('/jainlogic', async(req, res) => {
-    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', 'Balthazar_Prunes_SMP_Data_Hour_4_19_2020_to_5_19_2020.csv');
+app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
+    const targetCSV = res.req.res.locals.targetCSV;
+    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', targetCSV);
     const data = await utils.jainLogicParseCSV(sourceCSVFilePath);
     res.send(data);
 });
