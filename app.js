@@ -6,6 +6,9 @@ const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const app = express();
+
+const fs = require('fs');
+const path= require('path');
 let moment = require('moment');
 moment().format();
 
@@ -112,6 +115,12 @@ app.all('/ranchSystems/:days', async (req, res) => {
         console.log(err);
         res.send(err);
     })
+});
+
+app.get('/jainlogic', async(req, res) => {
+    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', 'Balthazar_Prunes_SMP_Data_Hour_4_19_2020_to_5_19_2020.csv');
+    const data = await utils.jainLogicParseCSV(sourceCSVFilePath);
+    res.send(data);
 });
 
 const port = process.env.PORT || 3000;

@@ -3,6 +3,7 @@ const _ = require('lodash');
 const path = require('path');
 const util = require('util');
 const fs = require('fs');
+const csv = require('fast-csv');
 let moment = require('moment');
 moment().format();
 
@@ -122,6 +123,17 @@ internals.jainLogicGetCsv = async (browser, page) => {
 
 internals.jainLogicGetSelectOptions = async (page, selector) => {
     //TODO:  Figure out a way of getting the station ids dynamically generated from the dropdown
+}
+
+internals.jainLogicParseCSV = async (sourceFilePath) => {
+    let results = [];
+    return new Promise((resolve, reject) => {
+        fs.createReadStream(sourceFilePath)
+        .pipe(csv.parse({ headers: true }))
+        .on('error', error => reject(error)) 
+        .on('data', row => results.push(row))
+        .on('end', data => resolve(results))
+      })
 }
 
 module.exports = internals;
