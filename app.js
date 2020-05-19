@@ -6,9 +6,6 @@ const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const app = express();
-
-const fs = require('fs');
-const path= require('path');
 let moment = require('moment');
 moment().format();
 
@@ -20,9 +17,6 @@ const FIELD_CLIMATE_PUBLIC_KEY = process.env.FIELD_CLIMATE_PUBLIC_APIKEY;
 const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
 const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
 
-//middleware
-const getTargetCSVFromLocation = require('./middleware/getTargetCSVFromLocation');
-
 //custom utlis
 const utils = require('./helper/utils');
 
@@ -33,8 +27,8 @@ app.use(bodyParser.json());
 app.get('/californiaWaterData/:target', async (req, res) => {
     
     const target = req.params.target;
-    const startDate = utils.calWaterDataGetTime().sixDaysAgo;
-    const endDate = utils.calWaterDataGetTime().today;
+    const startDate = utils.getTime().sixDaysAgo;
+    const endDate = utils.getTime().today;
     const uri = `${CAL_WATER_BASEURL}?appKey=${CAL_WATER_APIKEY}&targets=${target}&startDate=${startDate}&endDate=${endDate}&dataItems=day-eto`;
 
     const options = {
@@ -118,13 +112,6 @@ app.all('/ranchSystems/:days', async (req, res) => {
         console.log(err);
         res.send(err);
     })
-});
-
-app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
-    const targetCSV = res.req.res.locals.targetCSV;
-    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', targetCSV);
-    const data = await utils.jainLogicParseCSV(sourceCSVFilePath);
-    res.send(data);
 });
 
 const port = process.env.PORT || 3000;
