@@ -14,11 +14,11 @@ const utils = require('./helper/utils');
   await page.setViewport({ width: 1920, height: 937 })
 
   //enable verbose logging in console.
-  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-  await page.evaluate(() => console.log(`url is ${location.href}`));
+//   page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+//   await page.evaluate(() => console.log(`url is ${location.href}`));
 
   //login
-  const url = 'https://apps.puresense.com/IrrigationManagement';
+  const url = process.env.JAINLOGIC_LOGIN_URL;
   await page.goto(url);
   await page.focus('#username');
   await page.keyboard.type(process.env.JAINLOGIC_EMAIL);
@@ -32,13 +32,15 @@ const utils = require('./helper/utils');
   await page.screenshot({ path: './jainLogicData/debugging/afterNetworkIdle.png' });
   console.log('==Screenshot capture: after networkidle0==');
 
-  await page.goto('https://apps.puresense.com/IrrigationManagement/Chart/Index?contextAssetID=5925&selectedAssetID=41415');
+  await page.goto(process.env.JAINLOGIC_DASHBOARD_URL);
 
   await page.waitFor(5000);
   await page.screenshot({ path: './jainLogicData/debugging/afterClickingView.png' });
   console.log('==Screenshot capture: after clicking View==');
 
-  //staiton ids needs to iterate through the drop down
+  //await utils.jainLogicGetSelectOptions(page, '#AssetSelect');
+  
+  //hardcoded station ids.  
   const arrOfValues = [41415, 62876, 47273, 47270, 35129, 8948, 8943, 8947, 63719, 8946, 41664, 39202, 48725, 48729, 51278, 48735];
 
   for(let i = 0; i < arrOfValues.length; i++)

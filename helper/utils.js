@@ -19,7 +19,6 @@ internals.calWaterDataGetTime = () => {
 
 //ranchSystems
 internals.ranchSystemsTransform = (sourcePayload, rb) => {
-
     const targetDateStringFormat = 'YYYY/MM/DD hh:mm:ss';
     const targetTimeStringFormat = 'h:mm a';
     const data = sourcePayload.data;
@@ -72,39 +71,6 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
 }
 
 //jainLogic
-async function jainLogicDownload(page, f) {
-    await page._client.send('Page.setDownloadBehavior', {
-        behavior: 'allow',
-        downloadPath: jainLogicDownloadPath,
-    });
-
-    await f();
-
-    console.error('Downloading...');
-    let fileName;
-    while (!fileName || fileName.endsWith('.crdownload')) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
-    }
-
-    const filePath = path.resolve(jainLogicDownloadPath, fileName);
-    console.error('Downloaded file:', filePath);
-    return filePath;
-}
-
-internals.jainLogicGetCsv = async (browser, page) => {
-    try {
-        const pathToCsvData = await jainLogicDownload(page, async () =>
-            await page.click('#DownloadDataSpan')
-        );
-
-        const { size } = await util.promisify(fs.stat)(pathToCsvData);
-        console.log(pathToCsvData, `${size}B`);
-    } finally {
-        return;
-    }
-}
-
 internals.jainLogicDeleteCurrentCsvData = async () => {
     fs.readdir(jainLogicDownloadPath, function (err, items) {
         if (err) return console.log(err);
@@ -117,6 +83,45 @@ internals.jainLogicDeleteCurrentCsvData = async () => {
             })
         });
     });
+}
+
+async function jainLogicDownload(page, f) {
+    await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: jainLogicDownloadPath,
+    });
+
+    await f();
+
+    console.error('Downloading next file...');
+    let fileName;
+    let filePath;
+    while (!fileName || fileName.endsWith('.crdownload')) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
+        //console.log(fileName);
+    }
+
+    filePath = path.resolve(jainLogicDownloadPath, fileName);
+    return filePath;
+}
+
+//TODO: Files get saved in file system okay but logging isn't helpful. fix
+internals.jainLogicGetCsv = async (browser, page) => {
+    try {
+        let pathToCsvData = await jainLogicDownload(page, async () =>
+            await page.click('#DownloadDataSpan')
+        );
+
+        let { size } = await util.promisify(fs.stat)(pathToCsvData);
+        //console.log(pathToCsvData, `${size}B`);
+    } finally {
+        return;
+    }
+}
+
+internals.jainLogicGetSelectOptions = async (page, selector) => {
+    //TODO:  Figure out a way of getting the station ids dynamically generated from the dropdown
 }
 
 module.exports = internals;
