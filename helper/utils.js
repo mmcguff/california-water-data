@@ -125,12 +125,12 @@ internals.jainLogicParseCSV = async (sourceFilePath) => {
     const headers = [
         'date',
         'irrigation_zone',
-        'soil_mositure_8',
-        'soil_mositure_16',
-        'soil_mositure_28',
-        'soil_mositure_36',
-        'soil_mositure_48',
-        'soil_mositure_56',
+        'soil_moisture_8',
+        'soil_moisture_16',
+        'soil_moisture_28',
+        'soil_moisture_36',
+        'soil_moisture_48',
+        'soil_moisture_56',
         'pressure_switch'
     ];
 
