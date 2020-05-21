@@ -122,24 +122,60 @@ internals.jainLogicGetSelectOptions = async (page, selector) => {
 
 internals.jainLogicParseCSV = async (sourceFilePath) => {
     let results = [];
+    const headers = [
+        'date',
+        'irrigation_zone',
+        'soil_mositure_8',
+        'soil_mositure_16',
+        'soil_mositure_28',
+        'soil_mositure_36',
+        'soil_mositure_48',
+        'soil_mositure_56',
+        'pressure_switch'
+    ];
+
     return new Promise((resolve, reject) => {
         fs.createReadStream(sourceFilePath)
-        .pipe(csv.parse({ headers: true }))
+        .pipe(csv.parse({ headers, renameHeaders: true }))
         .on('error', error => reject(error)) 
         .on('data', row => results.push(row))
         .on('end', data => resolve(results))
       })
 }
 
+function getDateOnly(dateString){
+    let str = dateString;
+    let patt = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/;
+    return str.match(patt)[0];
+}
+
+
+
 internals.jainLogicTransformData = async (rawData, sort, days) => {
     let transformedData = [...rawData];
-
-
+    
+    //sorting the array
     if(sort === 'ascend')
     {
         transformedData = transformedData.reverse();     
-    }   
+    }
+    
 
+
+    // const today = moment().utcOffset(-8).format('YYYY-MM-DD');
+    // const lastValidDate = moment().utcOffset(-8).subtract(days, 'days').format('YYYY-M-DD');
+    
+    // let arr =[];
+    // let targetDate;
+    // for (let i = 0; i < transformedData.length; i++) {
+
+    //     targetDate = getDateOnly(transformedData[i].date);
+    //     momentTargetDate = moment(targetDate).format('MM/DD/YYYY');
+    //     if(moment(momentTargetDate).isBetween(today, lastValidDate)){
+    //         arr.push(transformedData[index]);
+    //     }
+    // }
+    
     return transformedData;
 }
 
