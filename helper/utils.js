@@ -62,4 +62,85 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     return transformedPayload;
 } 
 
+//jainLogic
+internals.jainLogicDeleteCurrentCsvData = async () => {
+    fs.readdir(jainLogicDownloadPath, function (err, items) {
+        if (err) return console.log(err);
+
+        //ensures that debugging and test csv files are not deleted during this process
+        items = items.filter(item => item !== 'debugging');
+        items = items.filter(item => item !== 'test.csv');
+
+        items.forEach(file => {
+            
+
+            fs.unlink(path.resolve(__dirname, '../jainLogicData', file), (err) => {
+                if (err) return console.log(err);
+            })
+        });
+    });
+}
+
+async function jainLogicDownload(page, f) {
+    await page._client.send('Page.setDownloadBehavior', {
+        behavior: 'allow',
+        downloadPath: jainLogicDownloadPath,
+    });
+
+    await f();
+
+    console.error('Downloading next file...');
+    let fileName;
+    let filePath;
+    while (!fileName || fileName.endsWith('.crdownload')) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
+        //console.log(fileName);
+    }
+
+    filePath = path.resolve(jainLogicDownloadPath, fileName);
+    return filePath;
+}
+
+//TODO: Files get saved in file system okay but logging isn't helpful. fix
+internals.jainLogicGetCsv = async (browser, page) => {
+    try {
+        let pathToCsvData = await jainLogicDownload(page, async () =>
+            await page.click('#DownloadDataSpan')
+        );
+
+        let { size } = await util.promisify(fs.stat)(pathToCsvData);
+        //console.log(pathToCsvData, `${size}B`);
+    } finally {
+        return;
+    }
+}
+
+internals.jainLogicGetSelectOptions = async (page, selector) => {
+    //TODO:  Figure out a way of getting the station ids dynamically generated from the dropdown
+}
+
+internals.jainLogicParseCSV = async (sourceFilePath) => {
+    let results = [];
+    return new Promise((resolve, reject) => {
+        fs.createReadStream(sourceFilePath)
+        .pipe(csv.parse({ headers: true }))
+        .on('error', error => reject(error)) 
+        .on('data', row => results.push(row))
+        .on('end', data => resolve(results))
+      })
+}
+
+internals.jainLogicTransformData = async (rawData, sort, days) => {
+    let transformedData = [...rawData];
+
+
+    if(sort === 'ascend')
+    {
+        transformedData = transformedData.reverse();     
+    }   
+
+    return transformedData;
+}
+
 module.exports = internals;

@@ -114,5 +114,17 @@ app.all('/ranchSystems/:days', async (req, res) => {
     })
 });
 
+app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
+    
+    const sort = req.query.sort ? req.query.sort : 'ascend';
+    const days = req.query.days ? req.query.days : 30;
+
+    const targetCSV = res.req.res.locals.targetCSV;
+    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', targetCSV);
+    const rawData = await utils.jainLogicParseCSV(sourceCSVFilePath);
+    const transformedData = await utils.jainLogicTransformData(rawData, sort, days);
+    res.send(transformedData);
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
