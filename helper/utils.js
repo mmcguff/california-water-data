@@ -1,12 +1,23 @@
 const internals = {};
 const _ = require('lodash');
-let moment = require('moment');
-moment().format();
+const path = require('path');
+const util = require('util');
+const fs = require('fs');
+const csv = require('fast-csv');
+const Moment = require('moment');
+Moment().format();
+const MomentRange = require('moment-range');
+const moment = MomentRange.extendMoment(Moment);
 
-internals.getTime = () => {
-    const today = moment().utcOffset(-8).format('YYYY-MM-DD');
-    const sixDaysAgo = moment().utcOffset(-8).subtract(6, 'days').format('YYYY-M-DD');
-    return {today, sixDaysAgo};
+//custom configuration
+const jainLogicDownloadPath = path.join(__dirname, '../jainLogicData');
+const internals = {};
+
+//califorinaWaterData
+internals.calWaterDataGetTime = () => {
+    const today = Moment().utcOffset(-8).format('YYYY-MM-DD');
+    const sixDaysAgo = Moment().utcOffset(-8).subtract(6, 'days').format('YYYY-MM-DD');
+    return { today, sixDaysAgo };
 }
 
 internals.ranchSystemsTransform = (sourcePayload, rb) => {
@@ -48,8 +59,8 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     for (let i = 0; i < minCommonLength; i++) {
 
         transformedPayload.push({
-            "date": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetDateStringFormat),
-            "10_X_X_4_time": moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetTimeStringFormat),
+            "date": Moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetDateStringFormat),
+            "10_X_X_4_time": Moment(new Date(data[_4inProbeIndexLocation].rmsdata[i].x)).format(targetTimeStringFormat),
             "4_in_soil_moisture": data[_4inProbeIndexLocation].rmsdata[i].y,
             "12_in_soil_moisture": data[_12inProbeIndexLocation].rmsdata[i].y,
             "24_in_soil_moisture": data[_24inProbeIndexLocation].rmsdata[i].y,
@@ -120,23 +131,12 @@ internals.jainLogicGetSelectOptions = async (page, selector) => {
     //TODO:  Figure out a way of getting the station ids dynamically generated from the dropdown
 }
 
-internals.jainLogicParseCSV = async (sourceFilePath) => {
+internals.jainLogicParseCSV = async (sourceFilePath, customHeaders) => {
     let results = [];
-    const headers = [
-        'date',
-        'irrigation_zone',
-        'soil_moisture_8',
-        'soil_moisture_16',
-        'soil_moisture_28',
-        'soil_moisture_36',
-        'soil_moisture_48',
-        'soil_moisture_56',
-        'pressure_switch'
-    ];
 
     return new Promise((resolve, reject) => {
         fs.createReadStream(sourceFilePath)
-        .pipe(csv.parse({ headers, renameHeaders: true }))
+        .pipe(csv.parse({ headers: customHeaders, renameHeaders: true }))
         .on('error', error => reject(error)) 
         .on('data', row => results.push(row))
         .on('end', data => resolve(results))
@@ -152,29 +152,27 @@ function getDateOnly(dateString){
 
 
 internals.jainLogicTransformData = async (rawData, sort, days) => {
-    let transformedData = [...rawData];
+    let arr = [...rawData];
     
     //sorting the array
-    if(sort === 'ascend')
-    {
-        transformedData = transformedData.reverse();     
+    arr = (sort === 'ascend') ? arr.reverse() : arr;
+    
+    const today = moment().utcOffset(-8).format('YYYY-MM-DD');
+    const lastValidDate = moment().utcOffset(-8).subtract(days, 'days').format('YYYY-MM-DD');
+    const tragetRange = moment.range(lastValidDate, today);
+    
+    let transformedData = [];
+    let rawDate;
+    let targetDate;
+    for (let i = 0; i < arr.length; i++) {
+        rawDate = getDateOnly(arr[i].date);
+        targetDate = moment(rawDate, 'MM/DD/YYYY');
+        
+        if(tragetRange.contains(targetDate))
+        {
+            transformedData.push(arr[i]);
+        }
     }
-    
-
-
-    // const today = moment().utcOffset(-8).format('YYYY-MM-DD');
-    // const lastValidDate = moment().utcOffset(-8).subtract(days, 'days').format('YYYY-M-DD');
-    
-    // let arr =[];
-    // let targetDate;
-    // for (let i = 0; i < transformedData.length; i++) {
-
-    //     targetDate = getDateOnly(transformedData[i].date);
-    //     momentTargetDate = moment(targetDate).format('MM/DD/YYYY');
-    //     if(moment(momentTargetDate).isBetween(today, lastValidDate)){
-    //         arr.push(transformedData[index]);
-    //     }
-    // }
     
     return transformedData;
 }

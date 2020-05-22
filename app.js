@@ -120,8 +120,9 @@ app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
     const days = req.query.days ? req.query.days : 30;
 
     const targetCSV = res.req.res.locals.targetCSV;
+    const csvHeaders = res.req.res.locals.csvHeaders;
     const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', targetCSV);
-    const rawData = await utils.jainLogicParseCSV(sourceCSVFilePath);
+    const rawData = await utils.jainLogicParseCSV(sourceCSVFilePath, csvHeaders);
     const transformedData = await utils.jainLogicTransformData(rawData, sort, days);
     res.send(transformedData);
 });
