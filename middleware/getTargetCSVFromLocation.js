@@ -7,15 +7,7 @@ module.exports = async (req, res, next) => {
     let csvArrIndex;
     let csvHeaders;
     switch (location) {
-        case 'ag-park-east-pump': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_Pump_Data'));
-            csvHeaders = [
-                'date',
-                'flow_total_1',
-                'avg_flow_1'
-            ]; 
-            break;
-        case 'test': 
+        case 'test':
             csvArrIndex = CSVFiles.findIndex(file => file.includes('test'));
             csvHeaders = [
                 'date',
@@ -29,8 +21,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_calc'
             ];
             break;
-        case 'ag-park-east-smp': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_SMP_Data')); 
+        case 'ag-park-east-smp':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_SMP_Data'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -42,9 +34,17 @@ module.exports = async (req, res, next) => {
                 'soil_moisture_56',
                 'pressure_switch_calc'
             ];
-        break;
-        case 'ag-park-west-unified': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West_Unified')); 
+            break;
+        case 'ag-park-east-pump':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_Pump_Data'));
+            csvHeaders = [
+                'date',
+                'flow_total_1',
+                'avg_flow_1'
+            ];
+            break;
+        case 'ag-park-west-unified':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West_Unified'));
             csvHeaders = [
                 'date',
                 'soil_mositure_sum',
@@ -58,7 +58,7 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'balthazar-prunes-smp':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Prunes')); 
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Prunes'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -72,8 +72,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_calc'
             ];
             break;
-        case 'balthazar-walnuts-smp': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Walnuts')); 
+        case 'balthazar-walnuts-smp':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Walnuts'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -88,8 +88,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_calc'
             ];
             break;
-        case 'buttehouse-prunes-nw': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_Prunes')); 
+        case 'buttehouse-prunes-nw':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_Prunes'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -101,8 +101,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_port_b'
             ];
             break;
-        case 'buttehouse-ws': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_WS')); 
+        case 'buttehouse-ws':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_WS'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -115,8 +115,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_1_averaged'
             ];
             break;
-        case 'home-walnuts-ws': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Home_Walnuts_WS')); 
+        case 'home-walnuts-ws':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Home_Walnuts_WS'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -128,8 +128,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_calc'
             ];
             break;
-        case 'lynna-s-block-ws': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Lynn')); 
+        case 'lynna-s-block-ws':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Lynn'));
             csvHeaders = [
                 'date',
                 'pressure_on_or_off',
@@ -142,8 +142,8 @@ module.exports = async (req, res, next) => {
                 'soil_moisture_48',
             ];
             break;
-        case 'meridian-walnuts-ws': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Meridian')); 
+        case 'meridian-walnuts-ws':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Meridian'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -157,8 +157,8 @@ module.exports = async (req, res, next) => {
                 'pressure_switch_calc'
             ];
             break;
-        case 'sanders-e': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_East_Data')); 
+        case 'sanders-e':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_East_Data'));
             csvHeaders = [
                 'date',
                 'soil_moisture_12',
@@ -169,8 +169,8 @@ module.exports = async (req, res, next) => {
                 'pressure_on_or_off'
             ];
             break;
-        case 'sanders-m-ws': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Middle')); 
+        case 'sanders-m-ws':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Middle'));
             csvHeaders = [
                 'date',
                 'soil_moisture_12',
@@ -181,9 +181,9 @@ module.exports = async (req, res, next) => {
                 'pressure_on_or_off'
             ];
             break;
-       
-        case 'south-sommers': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('South_Sommers')); 
+
+        case 'south-sommers':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('South_Sommers'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -198,17 +198,17 @@ module.exports = async (req, res, next) => {
             ];
             break;
         //duplicate pump issue?
-         case 'sanders-pump': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Pump')); 
+        case 'sanders-pump':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Pump'));
             csvHeaders = [
                 'date',
                 'pressure_on_or_off_1',
                 'pressure_on_or_off_2'
             ];
-            break; 
+            break;
         //returns empty for now
-         case 'ag-park-west-pump': 
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West')); 
+        case 'ag-park-west-pump':
+            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West'));
             csvHeaders = [
                 'date',
                 'flow_total_1',

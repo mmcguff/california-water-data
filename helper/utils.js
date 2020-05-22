@@ -1,4 +1,3 @@
-const internals = {};
 const _ = require('lodash');
 const path = require('path');
 const util = require('util');
