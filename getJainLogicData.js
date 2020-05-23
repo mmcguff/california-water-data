@@ -14,8 +14,8 @@ const utils = require('./helper/utils');
   await page.setViewport({ width: 1920, height: 937 })
 
   //enable verbose logging in console.
-//   page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-//   await page.evaluate(() => console.log(`url is ${location.href}`));
+  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+  await page.evaluate(() => console.log(`url is ${location.href}`));
 
   //login
   const url = process.env.JAINLOGIC_LOGIN_URL;
@@ -38,15 +38,19 @@ const utils = require('./helper/utils');
   await page.screenshot({ path: './jainLogicData/debugging/afterClickingView.png' });
   console.log('==Screenshot capture: after clicking View==');
 
-  //await utils.jainLogicGetSelectOptions(page, '#AssetSelect');
+  await utils.jainLogicGetSelectOptions(page, '#AssetSelect');
   
   //hardcoded station ids.  
   const arrOfValues = [41415, 62876, 47273, 47270, 35129, 8948, 8943, 8947, 63719, 8946, 41664, 39202, 48725, 48729, 51278, 48735];
+  
+  const csvDurationHandler = await page.$x("//div[contains(text(), '1y')]");
+  await csvDurationHandler[0].click();
 
   for(let i = 0; i < arrOfValues.length; i++)
   {
     await page.select('#AssetSelect', arrOfValues[i].toString())
     await page.waitFor(5000);
+    await page.waitFor(3000);
     await page.click('#DownloadMenuButton');
     await page.waitFor(3000);
     await utils.jainLogicGetCsv(browser, page);
