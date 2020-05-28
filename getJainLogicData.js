@@ -14,9 +14,11 @@ const utils = require('./helper/utils');
   await page.setViewport({ width: 1920, height: 937 })
 
   //enable verbose logging in console.
-  page.on('console', msg => console.log('PAGE LOG:', msg.text()));
-  await page.evaluate(() => console.log(`url is ${location.href}`));
-
+  if(process.env.JAINLOGIC_CRON_VERBOSE_LOGGING == true){
+    page.on('console', msg => console.log('PAGE LOG:', msg.text()));
+    await page.evaluate(() => console.log(`url is ${location.href}`));
+  }
+  
   //login
   const url = process.env.JAINLOGIC_LOGIN_URL;
   await page.goto(url);
@@ -43,7 +45,7 @@ const utils = require('./helper/utils');
   //hardcoded station ids.  
   const arrOfValues = [41415, 62876, 47273, 47270, 35129, 8948, 8943, 8947, 63719, 8946, 41664, 39202, 48725, 48729, 51278, 48735];
   
-  const csvDurationHandler = await page.$x("//div[contains(text(), '1y')]");
+  const csvDurationHandler = await page.$x("//div[contains(text(), '1m')]");
   await csvDurationHandler[0].click();
 
   for(let i = 0; i < arrOfValues.length; i++)
