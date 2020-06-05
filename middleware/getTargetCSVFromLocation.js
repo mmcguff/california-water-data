@@ -1,31 +1,34 @@
 const fs = require('fs');
 const path = require('path');
+const utils = require('../helper/utils');
 
 
 // Regardless of what is requested we will get both 1m and 1y csv for the location requested.  
 // Filters of what the user wants will happen later.  
 module.exports = async (req, res, next) => {
-    const CSVFiles = fs.readdirSync(path.join(__dirname, '../jainLogicData'));
+    const CSVFiles = await utils.jainLogicGetAllFilesFromS3();
     const location = req.params.location;
+    let mCSV = [];
+    let yCSV = [];
+    let mKeyIndex;
+    let yKeyIndex;
     let csvArrIndex;
     let csvHeaders;
+    
+    //take raw list of CSV from S3 and divide by 1m and 1y
+    CSVFiles.forEach(file => {
+        if(file.includes('1m')){
+          mCSV.push(file);
+        } else {
+          yCSV.push(file);
+        }
+      });
+
+    //based upon location get the 1m Key and 1y Key locations in s3 from the mCSV and yCSV arrays.
     switch (location) {
-        case 'test':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('test'));
-            csvHeaders = [
-                'date',
-                'irrigation_zone',
-                'soil_moisture_8',
-                'soil_moisture_16',
-                'soil_moisture_28',
-                'soil_moisture_36',
-                'soil_moisture_48',
-                'soil_moisture_56',
-                'pressure_switch_calc'
-            ];
-            break;
         case 'ag-park-east-smp':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_SMP_Data'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Agri-Park_East_SMP_Data'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Agri-Park_East_SMP_Data'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -39,7 +42,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'ag-park-east-pump':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_East_Pump_Data'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Agri-Park_East_Pump_Data'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Agri-Park_East_Pump_Data'));
             csvHeaders = [
                 'date',
                 'flow_total_1',
@@ -47,7 +51,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'ag-park-west-unified':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West_Unified'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Agri-Park_West_Unified'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Agri-Park_West_Unified'));
             csvHeaders = [
                 'date',
                 'soil_mositure_sum',
@@ -61,7 +66,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'balthazar-prunes-smp':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Prunes'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Balthazar_Prunes'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Balthazar_Prunes'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -76,7 +82,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'balthazar-walnuts-smp':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Balthazar_Walnuts'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Balthazar_Walnuts'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Balthazar_Walnuts'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -92,7 +99,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'buttehouse-prunes-nw':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_Prunes'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Buttehouse_Prunes'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Buttehouse_Prunes'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -105,7 +113,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'buttehouse-ws':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Buttehouse_WS'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Buttehouse_WS'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Buttehouse_WS'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -119,7 +128,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'home-walnuts-ws':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Home_Walnuts_WS'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Home_Walnuts_WS'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Home_Walnuts_WS'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -132,7 +142,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'lynna-s-block-ws':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Lynn'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Lynn'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Lynn'));
             csvHeaders = [
                 'date',
                 'pressure_on_or_off',
@@ -146,7 +157,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'meridian-walnuts-ws':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Meridian'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Meridian'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Meridian'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -161,7 +173,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'sanders-e':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_East_Data'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Sanders_East_Data'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Sanders_East_Data'));
             csvHeaders = [
                 'date',
                 'soil_moisture_12',
@@ -173,7 +186,8 @@ module.exports = async (req, res, next) => {
             ];
             break;
         case 'sanders-m-ws':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Middle'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Sanders_Middle'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Sanders_Middle'));
             csvHeaders = [
                 'date',
                 'soil_moisture_12',
@@ -186,7 +200,8 @@ module.exports = async (req, res, next) => {
             break;
 
         case 'south-sommers':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('South_Sommers'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('South_Sommers'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('South_Sommers'));
             csvHeaders = [
                 'date',
                 'irrigation_zone',
@@ -202,7 +217,8 @@ module.exports = async (req, res, next) => {
             break;
         //duplicate pump issue?
         case 'sanders-pump':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Sanders_Pump'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Sanders_Pump'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Sanders_Pump'));
             csvHeaders = [
                 'date',
                 'pressure_on_or_off_1',
@@ -211,7 +227,8 @@ module.exports = async (req, res, next) => {
             break;
         //returns empty for now
         case 'ag-park-west-pump':
-            csvArrIndex = CSVFiles.findIndex(file => file.includes('Agri-Park_West'));
+            mKeyIndex = mCSV.findIndex(file => file.includes('Agri-Park_West'));
+            yKeyIndex = yCSV.findIndex(file => file.includes('Agri-Park_West'));
             csvHeaders = [
                 'date',
                 'flow_total_1',
@@ -221,7 +238,10 @@ module.exports = async (req, res, next) => {
         default:
             return res.send('Invalid location sent');
     }
-    res.locals.targetCSV = CSVFiles[csvArrIndex];
+
+    //download 1m and 1y files
+    await utils.jainLogicDownloadFileFromS3(mCSV[mKeyIndex], '1m.csv');
+    await utils.jainLogicDownloadFileFromS3(yCSV[yKeyIndex], '1y.csv');
     res.locals.csvHeaders = csvHeaders;
     next();
 }

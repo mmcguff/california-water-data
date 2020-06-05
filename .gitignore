@@ -68,3 +68,4 @@ typings/
 jainLogicData/1m
 jainLogicData/1y
 jainLogicData/debugging
+*.csv

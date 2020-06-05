@@ -104,7 +104,7 @@ internals.jainLogicDeleteCurrentCsvData = async () => {
     });
 }
 
-internals.jainLogicGetAllFileFromS3 = async () => {
+internals.jainLogicGetAllFilesFromS3 = async () => {
     const params = {
         Bucket: process.env.JAINLOGIC_S3_BUCKET
     }
@@ -206,6 +206,23 @@ internals.jainLogicClearOldFromS3 = async (oldDataFiles) => {
 
 
 //jainLogic route calling helpers
+internals.jainLogicDownloadFileFromS3 = async (Key, fileName) => {
+
+    return new Promise((resolve, reject) => {
+        const destPath = path.join(__dirname, `../jainLogicData/data/${fileName}`)
+        const params = { Bucket: process.env.JAINLOGIC_S3_BUCKET, Key: Key }
+        s3.getObject(params)
+          .createReadStream()
+          .pipe(fs.createWriteStream(destPath))
+          .on('close', () => {
+            console.log(`File Successfully downloaded at: ${destPath}`);
+            resolve(destPath)
+          })
+      })
+}
+
+
+
 internals.jainLogicParseCSV = async (sourceFilePath, customHeaders) => {
     let results = [];
 

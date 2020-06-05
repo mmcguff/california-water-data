@@ -25,7 +25,7 @@ async function loopDownloads(page, browser, stationIds, _downloadPath, fileDownl
   //Getting a list of old CSV files that we will be deleting after the new stuff gets downloaded
   //Don't want to delete our csv data unelss there is new data to replace it.  
   await utils.jainLogicDeleteCurrentCsvData();
-  const oldDataFiles = await utils.jainLogicGetAllFileFromS3();
+  const oldDataFiles = await utils.jainLogicGetAllFilesFromS3();
   
   const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
   const page = await browser.newPage();

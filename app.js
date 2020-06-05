@@ -18,6 +18,12 @@ const FIELD_CLIMATE_PUBLIC_KEY = process.env.FIELD_CLIMATE_PUBLIC_APIKEY;
 const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
 const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
 
+//static file paths
+const mSourceFilePath = path.join(__dirname, 'jainLogicData/data/1m.csv');
+const ySourceFilePath = path.join(__dirname, 'jainLogicData/data/1y.csv');
+
+
+
 //middleware
 const getTargetCSVFromLocation = require('./middleware/getTargetCSVFromLocation');
 
@@ -120,15 +126,24 @@ app.all('/ranchSystems/:days', async (req, res) => {
 
 app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
     
+    //query parameters
     const sort = req.query.sort ? req.query.sort : 'ascend';
-    const days = req.query.days ? req.query.days : 30;
+    const days = req.query.days ? req.query.days : 31;
+    const type = req.query.type ? req.query.type : 'daily';
 
-    const targetCSV = res.req.res.locals.targetCSV;
     const csvHeaders = res.req.res.locals.csvHeaders;
-    const sourceCSVFilePath = path.resolve(__dirname, 'jainLogicData', targetCSV);
-    const rawData = await utils.jainLogicParseCSV(sourceCSVFilePath, csvHeaders);
-    const transformedData = await utils.jainLogicTransformData(rawData, sort, days);
-    res.send(transformedData);
+    let rawData;
+    
+    if(days > 31 && type == 'hourly') return res.send('hourly data not available passed 31 days.');
+
+    //1m monthly 1y daily
+    if(days > 31 || type == 'daily'){
+        rawData = await utils.jainLogicParseCSV(ySourceFilePath, csvHeaders);
+    } else {
+        rawData = await utils.jainLogicParseCSV(mSourceFilePath, csvHeaders);
+    } 
+     
+    res.send(await utils.jainLogicTransformData(rawData, sort, days));
 });
 
 const port = process.env.PORT || 3000;
