@@ -69,12 +69,12 @@ async function loopDownloads(page, browser, stationIds, _downloadPath, fileDownl
   //All 1m data should contain hourly readings
   const csvDurationHandler = await page.$x("//div[contains(text(), '1m')]");
   await csvDurationHandler[0].click();
-  await loopDownloads(page, browser, arrStationIds, _1mDownloadPath, fileDownloadCount);
+  await loopDownloads(page, browser, arrStationIds, _1mDownloadPath);
 
   //All 1y data should contain daily readings
   const csv1YDurationHandler = await page.$x("//div[contains(text(), '1y')]");
   await csv1YDurationHandler[0].click();
-  await loopDownloads(page, browser, arrStationIds, _1yDownloadPath, fileDownloadCount);
+  await loopDownloads(page, browser, arrStationIds, _1yDownloadPath);
 
   //push new files to s3
   await utils.jainLogicPushNewFilesToS3();
