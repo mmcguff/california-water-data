@@ -2,6 +2,23 @@
 const puppeteer = require('puppeteer');
 const jsonfile = require('jsonfile');
 const utils = require('./helper/utils');
+const path = require('path');
+
+//app dependencies
+const _1mDownloadPath = path.join(__dirname, './jainLogicData/1m');
+const _1yDownloadPath = path.join(__dirname, './jainLogicData/1y');
+
+
+async function loopDownloads(page, browser, stationIds, _downloadPath, fileDownloadCount){
+  for(let i = 0; i < stationIds.length; i++)
+  {
+    await page.select('#AssetSelect', stationIds[i].toString())
+    await page.waitFor(3000);
+    await page.click('#DownloadMenuButton');
+    await page.waitFor(3000);
+    await utils.jainLogicGetCsv(browser, page, _downloadPath);
+  }
+}
 
 (async (response) => {
 
@@ -32,31 +49,38 @@ const utils = require('./helper/utils');
   //customer selection
   await page.waitForNavigation({ waitUntil: 'networkidle0' });
 
-  await page.screenshot({ path: './jainLogicData/debugging/afterNetworkIdle.png' });
-  console.log('==Screenshot capture: after networkidle0==');
+  if(process.env.JAINLOGIC_CRON_VERBOSE_LOGGING == true){
+    await page.screenshot({ path: './jainLogicData/debugging/afterNetworkIdle.png' });
+    console.log('==Screenshot capture: after networkidle0==');
+  }
 
   await page.goto(process.env.JAINLOGIC_DASHBOARD_URL);
 
   await page.waitFor(5000);
-  await page.screenshot({ path: './jainLogicData/debugging/afterClickingView.png' });
-  console.log('==Screenshot capture: after clicking View==');
 
-  await utils.jainLogicGetSelectOptions(page, '#AssetSelect');
-  
+  if(process.env.JAINLOGIC_CRON_VERBOSE_LOGGING == true){
+    await page.screenshot({ path: './jainLogicData/debugging/afterClickingView.png' });
+    console.log('==Screenshot capture: after clicking View==');
+  }
+
   //hardcoded station ids.  
-  const arrOfValues = [41415, 62876, 47273, 47270, 35129, 8948, 8943, 8947, 63719, 8946, 41664, 39202, 48725, 48729, 51278, 48735];
+  const arrStationIds = [41415, 62876, 47273, 47270, 35129, 8948, 8943, 8947, 63719, 8946, 41664, 39202, 48725, 48729, 51278, 48735];
   
+  //All 1m data should contain hourly readings
   const csvDurationHandler = await page.$x("//div[contains(text(), '1m')]");
   await csvDurationHandler[0].click();
+  await loopDownloads(page, browser, arrStationIds, _1mDownloadPath, fileDownloadCount);
 
-  for(let i = 0; i < arrOfValues.length; i++)
-  {
-    await page.select('#AssetSelect', arrOfValues[i].toString())
-    await page.waitFor(3000);
-    await page.click('#DownloadMenuButton');
-    await page.waitFor(3000);
-    await utils.jainLogicGetCsv(browser, page);
-  }
+  //All 1y data should contain daily readings
+  const csv1YDurationHandler = await page.$x("//div[contains(text(), '1y')]");
+  await csv1YDurationHandler[0].click();
+  await loopDownloads(page, browser, arrStationIds, _1yDownloadPath, fileDownloadCount);
+
+  //push new files to s3
+  await utils.jainLogicPushNewFilesToS3();
+
+  //delete old files from s3
+  await utils.jainLogicClearOldFromS3(oldDataFiles);
 
   await browser.close();
   
