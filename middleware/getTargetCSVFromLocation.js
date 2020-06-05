@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 
+
+// Regardless of what is requested we will get both 1m and 1y csv for the location requested.  
+// Filters of what the user wants will happen later.  
 module.exports = async (req, res, next) => {
     const CSVFiles = fs.readdirSync(path.join(__dirname, '../jainLogicData'));
     const location = req.params.location;
