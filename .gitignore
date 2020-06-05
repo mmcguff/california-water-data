@@ -65,7 +65,4 @@ typings/
 .vscode.launch.json
 
 # staging of downloaded csv
-jainLogicData/1m
-jainLogicData/1y
-jainLogicData/debugging
 *.csv
