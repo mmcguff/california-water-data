@@ -8,6 +8,13 @@ Moment().format();
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 
+//AWS
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
 //custom configuration
 const jainLogicDownloadPath = path.join(__dirname, '../jainLogicData');
 const internals = {};
@@ -74,22 +81,49 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
 
 //jainLogic
 internals.jainLogicDeleteCurrentCsvData = async () => {
-    fs.readdir(jainLogicDownloadPath, function (err, items) {
-        if (err) return console.log(err);
 
-        //ensures that debugging and test csv files are not deleted during this process
-        items = items.filter(item => item !== 'debugging');
-        items = items.filter(item => item !== 'test.csv');
+    const targetFilePaths = [
+        '../jainLogicData/1y',
+        '../jainLogicData/1m'
+    ]
 
-        items.forEach(file => {
-            
+    targetFilePaths.forEach(targetFilePath => {
+        fs.readdir(path.join(__dirname, targetFilePath), function (err, files) {
+            if (err) return console.log(err);
+        
+            files.forEach(file => {
+                fs.unlink(path.resolve(__dirname, targetFilePath, file), (err) => {
+                    if (err) return console.log(err);
+                })
+            });
 
-            fs.unlink(path.resolve(__dirname, '../jainLogicData', file), (err) => {
-                if (err) return console.log(err);
-            })
-        });
+            console.log(`..Deleted all files at ${targetFilePath}`);
+        });  
     });
 }
+
+internals.jainLogicGetAllFileFromS3 = async () => {
+    const params = {
+        Bucket: process.env.JAINLOGIC_S3_BUCKET
+    }
+
+    let targetFiles = [];
+    for(;;){
+        let data = await s3.listObjects(params).promise();
+
+        data.Contents.forEach((file) => {
+            targetFiles = targetFiles.concat(file.Key);
+        });
+
+        if(!data.IsTruncated){
+            break;
+        }
+        params.Marker = data.NextMarker;
+    }
+    return targetFiles;
+} 
+
+
 
 async function jainLogicDownload(page, f) {
     await page._client.send('Page.setDownloadBehavior', {
@@ -105,14 +139,26 @@ async function jainLogicDownload(page, f) {
     while (!fileName || fileName.endsWith('.crdownload')) {
         await new Promise(resolve => setTimeout(resolve, 100));
         [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
-        //console.log(fileName);
+        await jainLogicPushFileToS3(filePath, fileName);
     }
 
     filePath = path.resolve(jainLogicDownloadPath, fileName);
+    console.log(filePath);
+    console.log(fileName);
     return filePath;
 }
 
-//TODO: Files get saved in file system okay but logging isn't helpful. fix
+async function jainLogicPushFileToS3 (filePath, fileName){
+
+
+    const params = {
+        Bucket: process.env.JAINLOGIC_S3_BUCKET,
+    }
+
+    return 'dog';
+
+}
+
 internals.jainLogicGetCsv = async (browser, page) => {
     try {
         let pathToCsvData = await jainLogicDownload(page, async () =>
@@ -120,7 +166,7 @@ internals.jainLogicGetCsv = async (browser, page) => {
         );
 
         let { size } = await util.promisify(fs.stat)(pathToCsvData);
-        //console.log(pathToCsvData, `${size}B`);
+        console.log(pathToCsvData, `${size}B`);
     } finally {
         return;
     }

@@ -8,7 +8,8 @@ const utils = require('./helper/utils');
   //Getting a list of old CSV files that we will be deleting after the new stuff gets downloaded
   //Don't want to delete our csv data unelss there is new data to replace it.  
   await utils.jainLogicDeleteCurrentCsvData();
-
+  const oldDataFiles = await utils.jainLogicGetAllFileFromS3();
+  
   const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
   const page = await browser.newPage();
   await page.setViewport({ width: 1920, height: 937 })
@@ -51,7 +52,6 @@ const utils = require('./helper/utils');
   for(let i = 0; i < arrOfValues.length; i++)
   {
     await page.select('#AssetSelect', arrOfValues[i].toString())
-    await page.waitFor(5000);
     await page.waitFor(3000);
     await page.click('#DownloadMenuButton');
     await page.waitFor(3000);
