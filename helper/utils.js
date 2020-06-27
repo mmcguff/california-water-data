@@ -8,6 +8,13 @@ Moment().format();
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
 
+//AWS
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+});
+
 //custom configuration
 const jainLogicDownloadPath = path.join(__dirname, '../jainLogicData');
 const internals = {};
@@ -72,63 +79,149 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     return transformedPayload;
 } 
 
-//jainLogic
+//jainLogic web crawling helpers
+
+
 internals.jainLogicDeleteCurrentCsvData = async () => {
-    fs.readdir(jainLogicDownloadPath, function (err, items) {
-        if (err) return console.log(err);
 
-        //ensures that debugging and test csv files are not deleted during this process
-        items = items.filter(item => item !== 'debugging');
-        items = items.filter(item => item !== 'test.csv');
+    const targetFilePaths = [
+        '../jainLogicData/1y',
+        '../jainLogicData/1m'
+    ]
 
-        items.forEach(file => {
-            
+    targetFilePaths.forEach(targetFilePath => {
+        fs.readdir(path.join(__dirname, targetFilePath), function (err, files) {
+            if (err) return console.log(err);
+        
+            files.forEach(file => {
+                fs.unlink(path.resolve(__dirname, targetFilePath, file), (err) => {
+                    if (err) return console.log(err);
+                })
+            });
 
-            fs.unlink(path.resolve(__dirname, '../jainLogicData', file), (err) => {
-                if (err) return console.log(err);
-            })
-        });
+            console.log(`..clearing old data files at: ${path.join(__dirname, targetFilePath)}`);
+        });  
     });
 }
 
-async function jainLogicDownload(page, f) {
+internals.jainLogicGetAllFilesFromS3 = async () => {
+    const params = {
+        Bucket: process.env.JAINLOGIC_S3_BUCKET
+    }
+
+    let targetFiles = [];
+    for(;;){
+        let data = await s3.listObjects(params).promise();
+
+        data.Contents.forEach((file) => {
+            targetFiles = targetFiles.concat(file.Key);
+        });
+
+        if(!data.IsTruncated){
+            break;
+        }
+        params.Marker = data.NextMarker;
+    }
+    return targetFiles;
+} 
+
+
+
+async function jainLogicDownload(page, downloadPath, f) {
     await page._client.send('Page.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: jainLogicDownloadPath,
+        downloadPath,
     });
 
     await f();
 
-    console.error('Downloading next file...');
     let fileName;
     let filePath;
     while (!fileName || fileName.endsWith('.crdownload')) {
         await new Promise(resolve => setTimeout(resolve, 100));
-        [fileName] = await util.promisify(fs.readdir)(jainLogicDownloadPath);
-        //console.log(fileName);
+        [fileName] = await util.promisify(fs.readdir)(downloadPath);
     }
 
     filePath = path.resolve(jainLogicDownloadPath, fileName);
+    console.log(`..new file downloaded.`);
     return filePath;
 }
 
-//TODO: Files get saved in file system okay but logging isn't helpful. fix
-internals.jainLogicGetCsv = async (browser, page) => {
+internals.jainLogicGetCsv = async (browser, page, downloadPath) => {
     try {
-        let pathToCsvData = await jainLogicDownload(page, async () =>
+        await jainLogicDownload(page, downloadPath, async () =>
             await page.click('#DownloadDataSpan')
         );
-
-        let { size } = await util.promisify(fs.stat)(pathToCsvData);
-        //console.log(pathToCsvData, `${size}B`);
     } finally {
         return;
     }
 }
 
-internals.jainLogicGetSelectOptions = async (page, selector) => {
-    //TODO:  Figure out a way of getting the station ids dynamically generated from the dropdown
+internals.jainLogicPushNewFilesToS3 = async () => {
+   
+    const targetFilePaths = [
+        '../jainLogicData/1y',
+        '../jainLogicData/1m'
+    ]
+
+    let folder;
+
+    let params = {
+        Bucket: process.env.JAINLOGIC_S3_BUCKET
+    }
+
+    targetFilePaths.forEach(targetFilePath => {
+        fs.readdir(path.join(__dirname, targetFilePath), function (err, files) {
+            if (err) return console.log(err);
+        
+            files.forEach(file => {
+                folder = (targetFilePath.includes('1y')) ? '1y': '1m';
+                params.Key = `${folder}/${Date.now()}-${file}`;
+                params.Body = fs.readFileSync(path.join(__dirname, `../jainLogicData/${folder}`, file))
+                
+                s3.upload(params, (err, data) => {
+                    if(err) throw err;
+                    console.log(`s3 upload successful at: ${data.Location}`);
+                }) 
+            });
+        });  
+    });
 }
+
+internals.jainLogicClearOldFromS3 = async (oldDataFiles) => {
+
+    const arrDeletionObj = [];
+    oldDataFiles.forEach(file => { arrDeletionObj.push({Key : file})});
+
+    const params = {
+        Bucket: process.env.JAINLOGIC_S3_BUCKET,
+        Delete: {Objects: arrDeletionObj}
+    };
+
+    s3.deleteObjects(params, async(err, data) => {
+        if(err) throw err;
+        console.log(data);
+    });
+}
+
+
+//jainLogic route calling helpers
+internals.jainLogicDownloadFileFromS3 = async (Key, fileName) => {
+
+    return new Promise((resolve, reject) => {
+        const destPath = path.join(__dirname, `../jainLogicData/data/${fileName}`)
+        const params = { Bucket: process.env.JAINLOGIC_S3_BUCKET, Key: Key }
+        s3.getObject(params)
+          .createReadStream()
+          .pipe(fs.createWriteStream(destPath))
+          .on('close', () => {
+            console.log(`File Successfully downloaded at: ${destPath}`);
+            resolve(destPath)
+          })
+      })
+}
+
+
 
 internals.jainLogicParseCSV = async (sourceFilePath, customHeaders) => {
     let results = [];
@@ -147,8 +240,6 @@ function getDateOnly(dateString){
     let patt = /(\d{1,4}([.\-/])\d{1,2}([.\-/])\d{1,4})/;
     return str.match(patt)[0];
 }
-
-
 
 internals.jainLogicTransformData = async (rawData, sort, days) => {
     let arr = [...rawData];

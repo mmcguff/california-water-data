@@ -63,3 +63,6 @@ typings/
 # .vscode configs
 .vscode
 .vscode.launch.json
+
+# staging of downloaded csv
+*.csv
