@@ -267,8 +267,148 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
     return transformedData;
 }
 
-
 //saturas
+internals.saturasSelectorClickSequence = async (page) => {
+
+    await page.evaluate(async () => {
+        const selectorSequenceArr = [
+            {
+              name: 'graphButtonSelector',
+              path: '#root > div > div.jss14 > header > div.sc-bdVaJa.lfEIfQ > div > a:nth-child(2)',
+              waitTime: 3000,
+            },
+            {
+              name: 'startingDateRangeSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-cqpYsc.fOwIwS > div:nth-child(1) > div > input',
+              waitTime: 3000,
+            },
+            {
+              name: '_2019DateSelector',
+              path: '#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div:nth-child(121)',
+              waitTime: 3000,
+            },
+            {
+              name: 'janDateSelector',
+              path: '#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div.MuiTypography-root.MuiPickersMonth-root.MuiPickersMonth-monthSelected.MuiTypography-h5.MuiTypography-colorPrimary',
+              waitTime: 3000,
+            },
+            {
+              name: 'Enter',
+              path: '#',
+              waitTime: 3000,
+            },
+            {
+              name: 'selectFarmsSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(1) > div > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstoneCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(2) > div > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'selectFarmsOkSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsPlusSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.sc-kcDeIU.fOhYHk > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsPlotsSelectSelector',
+              path: 'root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsPlotsInnerCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsPlotsInnerOkSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsTransSelectSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsTransInnerCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(4) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'canalFarmsTransInnerOkSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstonePlusSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.sc-kcDeIU.fOhYHk > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstonePlotsSelectSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstonePlotsInnerCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstonePlotsInnerOkSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstoneTransSelectSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstoneTransInnerCheckboxSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(3) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input',
+              waitTime: 3000,
+            },
+            {
+              name: 'poundstoneTransInnerOkSelector',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
+              waitTime: 3000,
+            },
+            {
+              name: 'createGraphSelector ',
+              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-eKZiaR.ipdBLK > button',
+              waitTime: 45000,
+            },      
+          ];
+      
+        selectorSequenceArr.forEach(async (step) => {
+            console.log(`${step.name} clicked..`);
+    
+            if(step.name == 'Enter'){
+                await page.keyboard.press('\n');
+                await page.waitFor(step.waitTime);
+                console.log('is this even working?');
+            } else {
+                await page.click(step.path);
+                await page.waitFor(step.waitTime);
+            }
+        });
+    });
+}
+
 internals.saturasDownloadJson = async (jsonData) => {
     const fileName = 'saturasData.json';
     const destPath = path.join(__dirname, `../saturasData/data/${fileName}`)
