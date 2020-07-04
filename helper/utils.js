@@ -267,4 +267,16 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
     return transformedData;
 }
 
+
+//saturas
+internals.saturasDownloadJson = async (jsonData) => {
+    const fileName = 'saturasData.json';
+    const destPath = path.join(__dirname, `../saturasData/data/${fileName}`)
+    let writeStream = fs.createWriteStream(destPath);
+    writeStream.write(jsonData, 'utf-8');
+    writeStream.on('finish', () => {
+        console.log('Saturas JSON Object collected!');
+    })
+}
+
 module.exports = internals;
