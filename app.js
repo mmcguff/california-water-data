@@ -7,6 +7,7 @@ const CryptoJS = require('crypto-js');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 let moment = require('moment');
 moment().format();
 
@@ -145,6 +146,14 @@ app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
      
     res.send(await utils.jainLogicTransformData(rawData, sort, days));
 });
+
+app.get('/saturas', async(req, res) => {
+    fs.readFile(path.join(__dirname, `./saturasData/data/saturasData.json`),async  (err, data) => {
+        if (err) throw err;
+        const transformedData = await utils.saturasTransformData(JSON.parse(data));
+        res.send(transformedData);
+    });  
+})
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));

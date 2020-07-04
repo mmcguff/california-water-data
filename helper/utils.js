@@ -419,4 +419,10 @@ internals.saturasDownloadJson = async (jsonData) => {
     })
 }
 
+internals.saturasTransformData = async (rawData) => {
+    //perform transformation here
+    const transformedData = rawData;
+    return transformedData;
+}
+
 module.exports = internals;
