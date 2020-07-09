@@ -7,7 +7,7 @@ const utils = require("./helper/utils");
   console.log('Starting Saturas Cron...');
   //browser setup
   const browser = await puppeteer.launch({ 
-    headless: false,
+    headless: true,
     defaultViewport: null,
     devtools: true,
     args: ['--no-sandbox', '--disable-dev-shm-usage'] 

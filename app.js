@@ -26,7 +26,8 @@ const ySourceFilePath = path.join(__dirname, 'jainLogicData/data/1y.csv');
 
 
 //middleware
-const getTargetCSVFromLocation = require('./middleware/getTargetCSVFromLocation');
+const jainLogicGetTargetCSVFromLocation = require('./middleware/jainLogicGetTargetCSVFromLocation');
+const saturasGetTargetDataFromLocation = require('./middleware/saturasGetTargetDataFromLocation');
 
 //custom utlis
 const utils = require('./helper/utils');
@@ -125,7 +126,7 @@ app.all('/ranchSystems/:days', async (req, res) => {
     })
 });
 
-app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
+app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, res) => {
     
     //query parameters
     const sort = req.query.sort ? req.query.sort : 'ascend';
@@ -147,7 +148,7 @@ app.get('/jainlogic/:location', getTargetCSVFromLocation, async(req, res) => {
     res.send(await utils.jainLogicTransformData(rawData, sort, days));
 });
 
-app.get('/saturas', async(req, res) => {
+app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req, res) => {
     fs.readFile(path.join(__dirname, `./saturasData/data/saturasData.json`),async  (err, data) => {
         if (err) throw err;
         const transformedData = await utils.saturasTransformData(JSON.parse(data));

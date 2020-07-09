@@ -131,8 +131,6 @@ internals.jainLogicGetAllFilesFromS3 = async () => {
     return targetFiles;
 } 
 
-
-
 async function jainLogicDownload(page, downloadPath, f) {
     await page._client.send('Page.setDownloadBehavior', {
         behavior: 'allow',
