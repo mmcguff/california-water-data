@@ -1,3 +1,4 @@
+//package dependencies
 const _ = require('lodash');
 const path = require('path');
 const util = require('util');
@@ -7,6 +8,7 @@ const Moment = require('moment');
 Moment().format();
 const MomentRange = require('moment-range');
 const moment = MomentRange.extendMoment(Moment);
+const atob = require('atob');
 
 //AWS
 const AWS = require('aws-sdk');
@@ -79,9 +81,13 @@ internals.ranchSystemsTransform = (sourcePayload, rb) => {
     return transformedPayload;
 } 
 
-//jainLogic web crawling helpers
+//shared
+internals.enableVerboseBrowserLogging = async(page) => {
+  page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+  await page.evaluate(() => console.log(`url is ${location.href}`));
+};
 
-
+//jainLogic
 internals.jainLogicDeleteCurrentCsvData = async () => {
 
     const targetFilePaths = [
@@ -268,148 +274,7 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
 }
 
 //saturas
-internals.saturasSelectorClickSequence = async (page) => {
-
-    await page.evaluate(async () => {
-        const selectorSequenceArr = [
-            {
-              name: 'graphButtonSelector',
-              path: '#root > div > div.jss14 > header > div.sc-bdVaJa.lfEIfQ > div > a:nth-child(2)',
-              waitTime: 3000,
-            },
-            {
-              name: 'startingDateRangeSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-cqpYsc.fOwIwS > div:nth-child(1) > div > input',
-              waitTime: 3000,
-            },
-            {
-              name: '_2019DateSelector',
-              path: '#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div:nth-child(121)',
-              waitTime: 3000,
-            },
-            {
-              name: 'janDateSelector',
-              path: '#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div.MuiTypography-root.MuiPickersMonth-root.MuiPickersMonth-monthSelected.MuiTypography-h5.MuiTypography-colorPrimary',
-              waitTime: 3000,
-            },
-            {
-              name: 'Enter',
-              path: '#',
-              waitTime: 3000,
-            },
-            {
-              name: 'selectFarmsSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(1) > div > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstoneCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(2) > div > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'selectFarmsOkSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsPlusSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.sc-kcDeIU.fOhYHk > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsPlotsSelectSelector',
-              path: 'root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsPlotsInnerCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsPlotsInnerOkSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsTransSelectSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsTransInnerCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(4) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'canalFarmsTransInnerOkSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstonePlusSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.sc-kcDeIU.fOhYHk > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstonePlotsSelectSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstonePlotsInnerCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstonePlotsInnerOkSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstoneTransSelectSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstoneTransInnerCheckboxSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(3) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input',
-              waitTime: 3000,
-            },
-            {
-              name: 'poundstoneTransInnerOkSelector',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button',
-              waitTime: 3000,
-            },
-            {
-              name: 'createGraphSelector ',
-              path: '#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-eKZiaR.ipdBLK > button',
-              waitTime: 45000,
-            },      
-          ];
-      
-        selectorSequenceArr.forEach(async (step) => {
-            console.log(`${step.name} clicked..`);
-    
-            if(step.name == 'Enter'){
-                await page.keyboard.press('\n');
-                await page.waitFor(step.waitTime);
-                console.log('is this even working?');
-            } else {
-                await page.click(step.path);
-                await page.waitFor(step.waitTime);
-            }
-        });
-    });
-}
-
-internals.saturasDownloadJson = async (jsonData) => {
+const saturasDownloadJson = async (jsonData) => {
     const fileName = 'saturasData.json';
     const destPath = path.join(__dirname, `../saturasData/data/${fileName}`)
     let writeStream = fs.createWriteStream(destPath);
@@ -417,6 +282,158 @@ internals.saturasDownloadJson = async (jsonData) => {
     writeStream.on('finish', () => {
         console.log('Saturas JSON Object collected!');
     })
+  }
+
+
+internals.saturuasInterceptTargetAPICall = async (page) => {
+  const patterns = ['https://saturasapp.com/api/report/plotsreport'];
+  const requestCache = new Map();
+  const client = await page.target().createCDPSession();
+
+  await client.send('Network.enable');
+
+  await client.send('Network.setRequestInterception', {
+    patterns: patterns.map(pattern => ({
+      urlPattern: pattern, interceptionStage: 'HeadersReceived'
+    }))
+  });
+
+  client.on('Network.requestIntercepted', async({ interceptionId, request}) => {
+    console.log(`Intercepted ${request.url} {interception id: ${interceptionId}}`);
+
+    const response = await client.send('Network.getResponseBodyForInterception',{ interceptionId });
+    let jsonData;
+
+    if(requestCache.has(response.body)){
+      console.log('requestCache called');
+      jsonData = requestCache.get(response.body);
+    } else {
+      const bodyData = response.base64Encoded ? atob(response.body) : response.body;
+      jsonData = bodyData;
+    }
+    //TODO: Figure out why this call to a local function is failing. 
+    await saturasDownloadJson(jsonData);
+  })
+}
+
+internals.saturasLoginSequence = async (page) => {
+  
+  const loginSelector = "#root > div > div.jss15 > div > div.sc-fjdhpX.eWGqgb > div > span:nth-child(3) > div > div > input";
+  const passwordSelector = "#root > div > div.jss15 > div > div.sc-fjdhpX.eWGqgb > div > span:nth-child(4) > div > div > input";
+  const signInbuttonSelector = "#root > div > div.jss15 > div > div.sc-fjdhpX.eWGqgb > div > span.sc-cSHVUG.cVdccz > button";
+
+  await page.goto(process.env.SATURAS_LOGIN_URL);
+  await page.waitFor(8000);
+  await page.focus(loginSelector);
+  await page.keyboard.type(process.env.SATURAS_EMAIL);
+  await page.focus(passwordSelector);
+  await page.keyboard.type(process.env.SATURAS_PASSWORD);
+  await page.click(signInbuttonSelector);
+
+  await page.waitForNavigation({ waitUntil: "networkidle2" });
+  await page.waitFor(3000);
+
+}
+
+internals.saturasSelectorClickSequence = async (page) => {
+    //TODO:  Build as a loop of clicks but will be verbose for now
+    //await utils.saturasSelectorClickSequence(page);
+
+    console.log('graphButtonSelector clicked...');
+    await page.click('#root > div > div.jss14 > header > div.sc-bdVaJa.lfEIfQ > div > a:nth-child(2)');
+    await page.waitFor(10000);
+
+    console.log('startingDateRangeSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-cqpYsc.fOwIwS > div:nth-child(1) > div > input');
+    await page.waitFor(3000);
+
+    console.log('_2019DateSelector clicked..');
+    await page.click('#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div:nth-child(121)');
+    await page.waitFor(3000);
+
+    console.log('janDateSelector clicked..');
+    await page.click('#body > div.MuiPopover-root.date-picker-inline > div.MuiPaper-root.MuiPaper-elevation8.MuiPopover-paper.MuiPaper-rounded > div > div.MuiPickersBasePicker-pickerView > div > div.MuiTypography-root.MuiPickersMonth-root.MuiPickersMonth-monthSelected.MuiTypography-h5.MuiTypography-colorPrimary');
+    await page.waitFor(3000);
+
+    console.log('Enter Pressed..');
+    await page.keyboard.press('\n'); 
+    await page.waitFor(3000);
+
+    console.log('selectFarmsSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsCheckboxSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(1) > div > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('poundstoneCheckboxSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(2) > div > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('selectFarmsOkSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-hIVACf.dnpcUk > div.sc-fHxwqH.hsWQHP > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsPlusSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.sc-kcDeIU.fOhYHk > div');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsPlotsSelectSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsPlotsInnerCheckboxSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsPlotsInnerOkSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsTransSelectSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsTransInnerCheckboxSelectorclicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(4) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('canalFarmsTransInnerOkSelector clicked..');
+    await page.waitFor(3000);
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(1) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button');
+
+    console.log('poundstonePlusSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.sc-kcDeIU.fOhYHk > div');
+    await page.waitFor(3000);
+
+    console.log('poundstonePlotsSelectSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div');
+    await page.waitFor(3000);
+
+    console.log('poundstonePlotsInnerCheckboxSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div > div > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('poundstonePlotsInnerOkSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(1) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button');
+    await page.waitFor(3000);
+
+    console.log('poundstoneTransSelectSelector');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div');
+    await page.waitFor(3000);
+
+    console.log('poundstoneTransInnerCheckboxSelector clicked..');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-eIHaNI.gsdGgv > div:nth-child(3) > div.sc-dxZgTM.liMceQ > span > span.MuiIconButton-label > input');
+    await page.waitFor(3000);
+
+    console.log('poundstoneTransInnerOkSelector clicked...');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-likbZx.cPkYea > div.sc-gpHHfC.fnqfNl > div:nth-child(2) > div.MuiCollapse-container.MuiCollapse-entered > div > div > div > div:nth-child(2) > div.sc-cEvuZC.fWJbmN > div > div.sc-cBdUnI.dnlong > button');
+    await page.waitFor(3000);
+
+    console.log('createGraphSelector clicked...');
+    await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-eKZiaR.ipdBLK > button');
+    await page.waitFor(45000);
 }
 
 internals.saturasTransformData = async (rawData) => {
