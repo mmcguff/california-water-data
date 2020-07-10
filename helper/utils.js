@@ -19,6 +19,7 @@ const s3 = new AWS.S3({
 
 //custom configuration
 const jainLogicDownloadPath = path.join(__dirname, '../jainLogicData');
+const saturasDataObjects = require('./saturasObjectModels');
 const internals = {};
 
 //califorinaWaterData
@@ -434,10 +435,91 @@ internals.saturasSelectorClickSequence = async (page) => {
     await page.waitFor(45000);
 }
 
-internals.saturasTransformData = async (rawData) => {
-    //perform transformation here
-    const transformedData = rawData;
-    return transformedData;
+//This function looks to see if the current UnixDate has a reading for irrigationValue at that time stamp
+function getMatchedValue(_currentUnixDate, _targetValuesArr){
+    
+    for(let i = 0; i < _targetValuesArr.length; i++){
+        if(_targetValuesArr[i][0] == _currentUnixDate)
+        {
+            return _targetValuesArr[i][1];
+        }
+    }
+    
+    return;
 }
+
+
+internals.saturasTransformData = async (rawData, location, type, days, sort) => {
+
+  const today = moment().utcOffset(-8).format('YYYY-MM-DD');
+  const lastValidDate = moment().utcOffset(-8).subtract(days, 'days').format('YYYY-MM-DD');
+  const tragetRange = moment.range(lastValidDate, today);
+  
+  const locationData = (location == 'canal') ? saturasDataObjects.dataObject.canal : saturasDataObjects.dataObject.poundstone; 
+  let targetData, currentUnixDate;
+  let transformedData = [];
+
+  if (type == 'plot') {
+    targetData = rawData.plots;   
+    targetData = _.find(targetData, {'plotTIndex': locationData.plotTIndex});
+
+    for(let i = 0; i < targetData.swpAvg.length; i++){
+        currentUnixDate = targetData.swpAvg[i][0];
+
+        if(tragetRange.contains(currentUnixDate))
+        {
+            transformedData.push({
+                date: new Date(currentUnixDate).toLocaleDateString(),
+                swpAvg: getMatchedValue(currentUnixDate, targetData.swpAvg),
+                et: getMatchedValue(currentUnixDate, targetData.et),
+                solarRadiation: getMatchedValue(currentUnixDate, targetData.solarRadiation),
+                dailyMaxWind: getMatchedValue(currentUnixDate, targetData.dailyMaxWind),
+                rain: getMatchedValue(currentUnixDate, targetData.rain),
+                irrigationValue: getMatchedValue(currentUnixDate, targetData.irrigationValue)
+            })  
+        }
+    }
+  }
+  
+  if (type == 'transmitor') {
+    targetData = rawData.transmitors;
+    targetData = _.find(targetData, {'plotTIndex': locationData.plotTIndex});
+
+    const longestLength = Math.max(targetData.volt.length, targetData.rssi.length, targetData.txTemp.length, targetData.txRh.length, targetData.sf.length);
+    const longestArr = targetData.rssi; //TODO:  Find better way to get this
+    for(let i = 0; i < longestLength; i++){
+        currentUnixDate = longestArr[i][0];
+
+        if(tragetRange.contains(currentUnixDate)){
+            transformedData.push({
+                date: new Date(currentUnixDate).toUTCString(),
+                volt: getMatchedValue(currentUnixDate, targetData.volt),
+                rssi: getMatchedValue(currentUnixDate, targetData.rssi),
+                txTemp: getMatchedValue(currentUnixDate, targetData.txTemp),
+                txRh: getMatchedValue(currentUnixDate, targetData.txRh),
+                sf: getMatchedValue(currentUnixDate, targetData.sf),
+            })
+        }
+    }
+  }
+  
+  if (type == 'sensor'){
+    targetData = rawData.sensors;
+    targetData = _.find(targetData, {'plotTIndex': locationData.plotTIndex});
+
+    for(let i = 0; i < targetData.sensorSwpAvg.length; i++){
+        currentUnixDate = targetData.sensorSwpAvg[i][0];
+        if(tragetRange.contains(currentUnixDate)){
+            transformedData.push({
+                date: new Date(currentUnixDate).toLocaleDateString(),
+                sensorSwpAvg: targetData.sensorSwpAvg[i][1],
+                soilEc: getMatchedValue(currentUnixDate, targetData.soilEc),
+                soilVwc: getMatchedValue(currentUnixDate, targetData.soilVwc)
+            })
+        }
+    }
+  }  
+  return (sort == 'ascend') ? transformedData : transformedData.reverse();
+};
 
 module.exports = internals;

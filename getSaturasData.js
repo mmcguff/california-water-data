@@ -22,7 +22,7 @@ const utils = require("./helper/utils");
   await utils.saturasSelectorClickSequence(page);
   
   await browser.close();
-  console.log('Finish Saturas Cron...');
+  console.log('Successfully Finish Saturas Cron...');
 })().catch(async (err) => {
   console.error(err);
   process.exit(1);

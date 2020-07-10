@@ -149,9 +149,15 @@ app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, re
 });
 
 app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req, res) => {
+
+    const location = res.req.res.locals.location;
+    const type = res.req.res.locals.type;
+    const sort = req.query.sort ? req.query.sort : 'ascend';
+    const days = req.query.days ? req.query.days : 31;
+
     fs.readFile(path.join(__dirname, `./saturasData/data/saturasData.json`),async  (err, data) => {
         if (err) throw err;
-        const transformedData = await utils.saturasTransformData(JSON.parse(data));
+        const transformedData = await utils.saturasTransformData(JSON.parse(data), location, type, days, sort);
         res.send(transformedData);
     });  
 })
