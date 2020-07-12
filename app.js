@@ -30,34 +30,28 @@ const saturasGetTargetDataFromLocation = require('./middleware/saturasGetTargetD
 //custom utlis
 const utils = require('./helpers/utils');
 
+//Swagger Configs
+const swaggerJSDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const swaggerOptions = require('./configs/swaggerJSDocsOptions');
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+
+
 app.use(cors());
 app.use(morgan('dev'));
 app.use(bodyParser.json());
 
-app.get('/californiaWaterData/:target', async (req, res) => {
-    
-    const target = req.params.target;
-    const startDate = utils.calWaterDataGetTime().sixDaysAgo;
-    const endDate = utils.calWaterDataGetTime().today;
-    const uri = `${CAL_WATER_BASEURL}?appKey=${CAL_WATER_APIKEY}&targets=${target}&startDate=${startDate}&endDate=${endDate}&dataItems=day-eto`;
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-    const options = {
-        headers: {
-            'Accept': '*/*'
-        }
-    };
-
-    await fetch(uri, options)
-    .then(response => response.json())
-    .then(data => {
-        res.send(data);
-    })
-    .catch(err => {
-        console.log(err);
-        res.send(err);
-    })
-});
-
+/**
+ * @swagger
+ * /fieldClimateData:
+ *  get:
+ *      summary: Request specifc fieldClimate Mositure data (no parameters) 
+ *      responses:
+ *          '200':
+ *              descrption: A successful response
+ */
 app.get('/fieldClimateData', async (req, res) => {
 
     const timestamp = new Date().toUTCString(); 
@@ -90,7 +84,107 @@ app.get('/fieldClimateData', async (req, res) => {
         })
 });
 
-app.all('/ranchSystems/:days', async (req, res) => {
+/**
+ * @swagger
+ * /californiaWaterData/{target}:
+ *  get:
+ *      summary: Request water data from a specifc target region. (target = 250)
+ *      parameters: 
+ *          - in: path
+ *            name: target
+ *            schema:
+ *            type: string
+ *            default: '250'
+ *            required: true
+ *            description: Numeric ID of the target location  
+ *      responses:
+ *          '200':
+ *              descrption: A successful response
+ */
+app.get('/californiaWaterData/:target', async (req, res) => {
+    
+    const target = req.params.target;
+    const startDate = utils.calWaterDataGetTime().sixDaysAgo;
+    const endDate = utils.calWaterDataGetTime().today;
+    const uri = `${CAL_WATER_BASEURL}?appKey=${CAL_WATER_APIKEY}&targets=${target}&startDate=${startDate}&endDate=${endDate}&dataItems=day-eto`;
+
+    const options = {
+        headers: {
+            'Accept': '*/*'
+        }
+    };
+
+    await fetch(uri, options)
+    .then(response => response.json())
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        console.log(err);
+        res.send(err);
+    })
+});
+
+
+/**
+ * @swagger
+ * /ranchSystems/{days}:
+ *  post:
+ *      summary: Request ranch system soil mositure data filter by number of days.  (days = 365)
+ *      description: IMPORTANT- SAMPLE REUQUEST BODY ISN'T WORKING.  COPY AND PASTE FROM HERE = {"_4inProbeId" &#58; 227967,"_12inProbeId"&#58; 227968,"_24inProbeId"&#58; 227969,"_36inProbeId"&#58; 227970,"_48inProbeId"&#58; 227971,"_60inProbeId"&#58; 227972,"_0To100PSIProbeId"&#58; 227975}
+ *      requestBody:
+ *       content:
+ *         application/json:
+ *           schema:      
+ *             type: object
+ *             properties:
+ *               _4inProbeId:
+ *                 type: integer
+ *               _12inProbeId:
+ *                 type: integer
+ *               _24inProbeId:
+ *                 type: integer 
+ *               _36inProbeId:
+ *                 type: integer 
+ *               _48inProbeId:
+ *                 type: integer
+ *               _60inProbeId:
+ *                 type: integer 
+ *               _0To100PSIProbeId:
+ *                 type: integer 
+ *             example:
+ *              _4inProbeId : 227967
+ *              _12inProbeId : 227968
+ *              _24inProbeId : 227969
+ *              _36inProbeId : 227970
+ *              _48inProbeId : 227971
+ *              _60inProbeId : 227972
+ *              _0to100PSIProbeId : 227975        
+ *      parameters: 
+ *          - in: header
+ *            name: username
+ *            required: true
+ *            schema:
+ *              type: string
+ *              required: true
+ *          - in: header
+ *            name: password
+ *            required: true
+ *            schema:
+ *              type: string
+ *              required: true
+ *          - in: path
+ *            name: days
+ *            required: true
+ *            schema:
+ *              type: string
+ *              default: '31'
+ *              description: Number of days desired in your response
+ *      responses:
+ *          '200':
+ *              description: A successful response
+ */
+app.post('/ranchSystems/:days', async (req, res) => {
 
    let RANCH_SYSTEMS_USERNAME =  req.headers.username || '';
    let RANCH_SYSTEMS_PASSWORD = req.headers.password || '';
@@ -124,6 +218,42 @@ app.all('/ranchSystems/:days', async (req, res) => {
     })
 });
 
+/**
+ * @swagger
+ * /jainlogic/{location}:
+ *  get:
+ *      summary: Use to get jainlogic soil moisutre data (days range from 1 to 365)
+ *      parameters:
+ *          - in: path
+ *            name: location
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [ag-park-east-smp, ag-park-east-pump, ag-park-west-unified, balthazar-prunes-smp, balthazar-walnuts-smp, buttehouse-prunes-nw, buttehouse-ws, home-walnuts-ws, lynna-s-block-ws,meridian-walnuts-ws, sanders-e, sanders-m-ws, south-sommers, sanders-pump, ag-park-west-pump]
+ *              default: 'ag-park-east-smp'
+ *          - in: query
+ *            name: sort
+ *            schema:
+ *              type: string              
+ *              enum: [ascend, descend]
+ *              example: ascend
+ *          - in: query
+ *            name: days
+ *            schema:
+ *              type: string              
+ *              default: '31'
+ *              example: 31
+ *          - in: query
+ *            name: type
+ *            schema:
+ *              type: string              
+ *              enum: [daily, hourly]
+ *              example: daily
+ *      responses:
+ *          '200':
+ *              description: A successful response
+ * 
+ */
 app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, res) => {
     
     //query parameters
@@ -146,6 +276,42 @@ app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, re
     res.send(await utils.jainLogicTransformData(rawData, sort, days));
 });
 
+/**
+ * @swagger
+ * /saturas/{location}/{type}:
+ *  get:
+ *      summary: request saturas-sg to see Tree mositure data.  Data doesn't go about a full year at this time.
+ *      parameters:
+ *          - in: path
+ *            name: location
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [canal, poundstone]
+ *              default: 'canal'
+ *          - in: path
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [plot, transmitor, sensor]
+ *              default: 'plot'
+ *          - in: query
+ *            name: sort
+ *            schema:
+ *              type: string              
+ *              enum: [ascend, descend]
+ *              example: ascend
+ *          - in: query
+ *            name: days
+ *            schema:
+ *              type: string              
+ *              default: '31'
+ *              example: 31
+ *      responses:
+ *          '200':
+ *              descrption: A successful response
+ */
 app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req, res) => {
 
     const location = res.req.res.locals.location;
