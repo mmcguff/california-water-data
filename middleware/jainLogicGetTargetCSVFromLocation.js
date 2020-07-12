@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const utils = require('../helper/utils');
+const utils = require('../helpers/utils');
 
 
 // Regardless of what is requested we will get both 1m and 1y csv for the location requested.  

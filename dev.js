@@ -1,4 +1,4 @@
-const saturasModels = require('./helper/saturasObjectModels');
+const saturasModels = require('./helpers/saturasObjectModels');
 
 (async () => {
 

@@ -20,17 +20,15 @@ const FIELD_CLIMATE_PRIVATE_KEY = process.env.FIELD_CLIMATE_PRIVATE_APIKEY;
 const RANCH_SYSTEMS_BASEURL = process.env.RANCH_SYSTEMS_BASEURL;
 
 //static file paths
-const mSourceFilePath = path.join(__dirname, 'jainLogicData/data/1m.csv');
-const ySourceFilePath = path.join(__dirname, 'jainLogicData/data/1y.csv');
-
-
+const mSourceFilePath = path.join(__dirname, 'cron-jainlogic/data/1m.csv');
+const ySourceFilePath = path.join(__dirname, 'cron-jainlogic/data/1y.csv');
 
 //middleware
 const jainLogicGetTargetCSVFromLocation = require('./middleware/jainLogicGetTargetCSVFromLocation');
 const saturasGetTargetDataFromLocation = require('./middleware/saturasGetTargetDataFromLocation');
 
 //custom utlis
-const utils = require('./helper/utils');
+const utils = require('./helpers/utils');
 
 app.use(cors());
 app.use(morgan('dev'));
@@ -155,7 +153,7 @@ app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req,
     const sort = req.query.sort ? req.query.sort : 'ascend';
     const days = req.query.days ? req.query.days : 31;
 
-    fs.readFile(path.join(__dirname, `./saturasData/data/saturasData.json`),async  (err, data) => {
+    fs.readFile(path.join(__dirname, `./cron-saturas/data/saturasData.json`),async  (err, data) => {
         if (err) throw err;
         const transformedData = await utils.saturasTransformData(JSON.parse(data), location, type, days, sort);
         res.send(transformedData);
