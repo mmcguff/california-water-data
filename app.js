@@ -50,7 +50,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
  *      summary: Request specifc fieldClimate Mositure data (no parameters) 
  *      responses:
  *          '200':
- *              descrption: A successful response
+ *              description: ok
  */
 app.get('/fieldClimateData', async (req, res) => {
 
@@ -99,7 +99,7 @@ app.get('/fieldClimateData', async (req, res) => {
  *            description: Numeric ID of the target location  
  *      responses:
  *          '200':
- *              descrption: A successful response
+ *              description: ok
  */
 app.get('/californiaWaterData/:target', async (req, res) => {
     
@@ -131,7 +131,7 @@ app.get('/californiaWaterData/:target', async (req, res) => {
  * /ranchSystems/{days}:
  *  post:
  *      summary: Request ranch system soil mositure data filter by number of days.  (days = 365)
- *      description: IMPORTANT- SAMPLE REUQUEST BODY ISN'T WORKING.  COPY AND PASTE FROM HERE = {"_4inProbeId" &#58; 227967,"_12inProbeId"&#58; 227968,"_24inProbeId"&#58; 227969,"_36inProbeId"&#58; 227970,"_48inProbeId"&#58; 227971,"_60inProbeId"&#58; 227972,"_0To100PSIProbeId"&#58; 227975}
+ *      description: IMPORTANT- SAMPLE REQUEST BODY ISN'T WORKING.  COPY AND PASTE FROM HERE = {"_4inProbeId" &#58; 227967,"_12inProbeId"&#58; 227968,"_24inProbeId"&#58; 227969,"_36inProbeId"&#58; 227970,"_48inProbeId"&#58; 227971,"_60inProbeId"&#58; 227972,"_0To100PSIProbeId"&#58; 227975}
  *      requestBody:
  *       content:
  *         application/json:
@@ -176,13 +176,13 @@ app.get('/californiaWaterData/:target', async (req, res) => {
  *          - in: path
  *            name: days
  *            required: true
+ *            description: Number of days desired in your response
  *            schema:
  *              type: string
  *              default: '31'
- *              description: Number of days desired in your response
  *      responses:
  *          '200':
- *              description: A successful response
+ *              description: ok
  */
 app.post('/ranchSystems/:days', async (req, res) => {
 
@@ -251,7 +251,7 @@ app.post('/ranchSystems/:days', async (req, res) => {
  *              example: daily
  *      responses:
  *          '200':
- *              description: A successful response
+ *              description: ok
  * 
  */
 app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, res) => {
@@ -310,7 +310,7 @@ app.get('/jainlogic/:location', jainLogicGetTargetCSVFromLocation, async(req, re
  *              example: 31
  *      responses:
  *          '200':
- *              descrption: A successful response
+ *              description: ok
  */
 app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req, res) => {
 
