@@ -120,8 +120,15 @@ app.get('/californiaWaterData/:target', async (req, res) => {
         res.send(data);
     })
     .catch(err => {
-        console.log(err);
-        res.send(err);
+        const errorObject = {
+            error: {
+                name: 'califorina-water-api-internal-error',
+                message: 'The internal api called to provide data to this route is unavailable or failing right now.  Please try again later.',
+                errorBody: err
+            }
+        }
+        console.log(errorObject);
+        res.send(errorObject);
     })
 });
 
