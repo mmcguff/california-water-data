@@ -31,7 +31,7 @@ internals.calWaterDataGetTime = () => {
 
 internals.ranchSystemsTransform = (sourcePayload, rb) => {
     
-    const targetDateStringFormat = 'YYYY/MM/DD hh:mm:ss';
+    const targetDateStringFormat = 'MM/DD/YYYY h:mm a';
     const targetTimeStringFormat = 'h:mm a';
     const data = sourcePayload.data;
 
@@ -265,6 +265,7 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
         
         if(tragetRange.contains(targetDate))
         {
+            arr[i].date = moment(new Date(arr[i].date).toISOString()).format('MM/DD/YYYY h:mm a');
             transformedData.push(arr[i]);
         }
     }
