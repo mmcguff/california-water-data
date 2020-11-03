@@ -31,7 +31,7 @@ internals.calWaterDataGetTime = () => {
 
 internals.ranchSystemsTransform = (sourcePayload, rb) => {
     
-    const targetDateStringFormat = 'YYYY/MM/DD hh:mm:ss';
+    const targetDateStringFormat = 'MM/DD/YYYY h:mm a';
     const targetTimeStringFormat = 'h:mm a';
     const data = sourcePayload.data;
 
@@ -265,6 +265,7 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
         
         if(tragetRange.contains(targetDate))
         {
+            arr[i].date = moment(new Date(arr[i].date).toISOString()).format('MM/DD/YYYY h:mm a');
             transformedData.push(arr[i]);
         }
     }
@@ -273,16 +274,43 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
 }
 
 //saturas
+internals.saturasDownloadFileFromS3 = async (fileName) => {
+
+    return new Promise((resolve, reject) => {
+        const destPath = path.join(__dirname, `../cron-saturas/data/${fileName}`)
+        const params = { Bucket: process.env.SATURAS_S3_BUCKET, Key: 'saturas-data.json' }
+        s3.getObject(params)
+          .createReadStream()
+          .pipe(fs.createWriteStream(destPath))
+          .on('close', () => {
+            console.log(`File Successfully downloaded at: ${destPath}`);
+            resolve(destPath)
+          })
+      })
+}
+
 const saturasDownloadJson = async (jsonData) => {
     const fileName = 'saturasData.json';
     const destPath = path.join(__dirname, `../cron-saturas/data/${fileName}`)
     let writeStream = fs.createWriteStream(destPath);
-    writeStream.write(jsonData, 'utf-8');
+    writeStream.write(jsonData, 'utf8');
     writeStream.on('finish', () => {
         console.log('Saturas JSON Object collected!');
     })
   }
+  
+  const saturasPushNewFilesToS3 = async (_jsonData) => {
+    let params = {
+      Bucket: process.env.SATURAS_S3_BUCKET,
+      Key: `saturas-data.json`, //if you don't include a time stamp here not implementation of a delete should be needed
+      Body: _jsonData,
+    };
 
+    s3.upload(params, (err, data) => {
+      if (err) throw err;
+      console.log(`s3 upload successful at: ${data.Location}`);
+    });
+  };
 
 internals.saturuasInterceptTargetAPICall = async (page) => {
   const patterns = ['https://saturasapp.com/api/report/plotsreport'];
@@ -310,7 +338,7 @@ internals.saturuasInterceptTargetAPICall = async (page) => {
       const bodyData = response.base64Encoded ? atob(response.body) : response.body;
       jsonData = bodyData;
     }
-    //TODO: Figure out why this call to a local function is failing. 
+    await saturasPushNewFilesToS3(jsonData);
     await saturasDownloadJson(jsonData);
   })
 }
@@ -432,7 +460,7 @@ internals.saturasSelectorClickSequence = async (page) => {
 
     console.log('createGraphSelector clicked...');
     await page.click('#root > div > div.jss15 > div > div.sc-hzDkRC.igZSEb > div > div.sc-jeCdPy.gjhURx > div > div.sc-eKZiaR.ipdBLK > button');
-    await page.waitFor(45000);
+    await page.waitFor(120000);//this insanely long wait time assures that the download of the JSON is complete to S3. 
 }
 
 //This function looks to see if the current UnixDate has a reading for irrigationValue at that time stamp
@@ -447,7 +475,6 @@ function getMatchedValue(_currentUnixDate, _targetValuesArr){
     
     return;
 }
-
 
 internals.saturasTransformData = async (rawData, location, type, days, sort) => {
 
@@ -469,7 +496,7 @@ internals.saturasTransformData = async (rawData, location, type, days, sort) => 
         if(tragetRange.contains(currentUnixDate))
         {
             transformedData.push({
-                date: new Date(currentUnixDate).toLocaleDateString(),
+                date: moment(new Date(currentUnixDate)).format('MM/DD/YYYY'), //convert this date using moment
                 swpAvg: getMatchedValue(currentUnixDate, targetData.swpAvg),
                 et: getMatchedValue(currentUnixDate, targetData.et),
                 solarRadiation: getMatchedValue(currentUnixDate, targetData.solarRadiation),
@@ -492,7 +519,7 @@ internals.saturasTransformData = async (rawData, location, type, days, sort) => 
 
         if(tragetRange.contains(currentUnixDate)){
             transformedData.push({
-                date: new Date(currentUnixDate).toUTCString(),
+                date: moment(new Date(currentUnixDate)).format('MM/DD/YYYY h:mm a'),
                 volt: getMatchedValue(currentUnixDate, targetData.volt),
                 rssi: getMatchedValue(currentUnixDate, targetData.rssi),
                 txTemp: getMatchedValue(currentUnixDate, targetData.txTemp),
@@ -511,7 +538,7 @@ internals.saturasTransformData = async (rawData, location, type, days, sort) => 
         currentUnixDate = targetData.sensorSwpAvg[i][0];
         if(tragetRange.contains(currentUnixDate)){
             transformedData.push({
-                date: new Date(currentUnixDate).toLocaleDateString(),
+                date: moment(new Date(currentUnixDate)).format('MM/DD/YYYY'),
                 sensorSwpAvg: targetData.sensorSwpAvg[i][1],
                 soilEc: getMatchedValue(currentUnixDate, targetData.soilEc),
                 soilVwc: getMatchedValue(currentUnixDate, targetData.soilVwc)

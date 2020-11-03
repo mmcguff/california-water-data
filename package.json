@@ -4,7 +4,7 @@
   "description": "This api will get data from several api engines and serve it to a frontend in order to avoid CORS issue of getting resources in a browser.",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon -r dotenv/config app.js",
+    "start": "node -r dotenv/config app.js",
     "cron:jainlogic:local": "node -r dotenv/config cron-jainlogic.js",
     "cron:jainlogic:prod": "node cron-jainlogic.js",
     "cron:saturas:local": "node -r dotenv/config cron-saturas.js",

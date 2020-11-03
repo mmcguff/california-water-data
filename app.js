@@ -326,6 +326,8 @@ app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req,
     const sort = req.query.sort ? req.query.sort : 'ascend';
     const days = req.query.days ? req.query.days : 31;
 
+    await utils.saturasDownloadFileFromS3('saturasData.json');
+
     fs.readFile(path.join(__dirname, `./cron-saturas/data/saturasData.json`),async  (err, data) => {
         if (err) throw err;
         const transformedData = await utils.saturasTransformData(JSON.parse(data), location, type, days, sort);
