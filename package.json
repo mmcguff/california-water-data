@@ -9,7 +9,9 @@
     "cron:jainlogic:prod": "node cron-jainlogic.js",
     "cron:saturas:local": "node -r dotenv/config cron-saturas.js",
     "cron:saturas:prod": "node cron-saturas.js",
+    "cron:atn:local": "node -r dotenv/config cron-atn.js",
     "devtest:local": "node -r dotenv/config dev.js"
+    
   },
   "author": "Matthew McGuff",
   "license": "ISC",
