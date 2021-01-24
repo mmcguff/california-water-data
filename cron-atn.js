@@ -1,24 +1,30 @@
-const puppeteer = require('puppeteer');
-const utils = require('./helpers/utils');
-
+const atn = require('./helpers/atn-cron-utils');
+const fetch = require('node-fetch');
+const moment = require('moment'); 
+moment().format(); 
 
 (async () => {
 
-const browser = await puppeteer.launch({ 
-    headless: false,
-    defaultViewport: { width: 1920, height: 937 },
-    devtools: true,
-    args: ['--no-sandbox'] 
-    });
-const [page] = await browser.pages();
-await page.goto(process.env.ATN_URL);
-await page.waitForSelector('input[name=j_username]');
-await page.focus('input[name=j_username]');
-await page.keyboard.type(process.env.ATN_USERNAME);
-await page.focus('input[name=j_password]');
-await page.keyboard.type(process.env.ATN_PASSWORD);
-await page.click('input[type=submit]');
+const cookie = await atn.getSessionCookieFromLogin();
+const endDate = moment().unix();
+const startDate = moment().subtract(2, 'years').unix();
 
+//make api call using fetch to get needed data
+const url = `https://atn.irrigate.net/values2?action=getValuesJson&startDate=${startDate}&endDate=${endDate}&width=1710&panelId=23847&tagNodeIds=27368,27356,27351,27341,27354,-1,`;
+
+console.log(cookie);
+
+
+
+
+
+
+
+//download the data
+
+//push data into aws
+
+//TODO: Create routes for accessing the data you have saved. 
 
 
 })();
