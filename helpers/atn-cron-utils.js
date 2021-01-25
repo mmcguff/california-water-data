@@ -9,12 +9,7 @@ const emoji = require('node-emoji');
 const private = {};
 
 private.getSessionCookieFromLogin = async () => {
-    const browser = await puppeteer.launch({ 
-        headless: true,
-        defaultViewport: { width: 1920, height: 937 },
-        args: ['--no-sandbox'] 
-        });
-    
+    const browser = await puppeteer.launch({args: ['--no-sandbox']});
     const [page] = await browser.pages();
     await page.goto(process.env.ATN_URL);
     await page.waitForSelector('input[name=j_username]');
