@@ -45,6 +45,7 @@ await fetch(url, options)
 .then(response => response.json())
 .then(data => {
     atn.uploadDataToS3(JSON.stringify(data), `atn-${moment.unix(startDate).format("MM-DD-YYYY")}to${moment.unix(endDate).format("MM-DD-YYYY")}`);
+    process.env['ATN_S3_FILENAME'] = `atn-${moment.unix(startDate).format("MM-DD-YYYY")}to${moment.unix(endDate).format("MM-DD-YYYY")}`;
 })
 .catch(err => {
     console.log(err);

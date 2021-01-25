@@ -20,6 +20,7 @@ const s3 = new AWS.S3({
 //custom configuration
 const jainLogicDownloadPath = path.join(__dirname, '../cron-jainlogic');
 const saturasDataObjects = require('./saturasObjectModels');
+const saturasGetTargetDataFromLocation = require('../middleware/saturasGetTargetDataFromLocation');
 const internals = {};
 
 //califorinaWaterData
@@ -272,6 +273,48 @@ internals.jainLogicTransformData = async (rawData, sort, days) => {
     
     return transformedData;
 }
+
+internals.atnDownloadFileFromS3 = async () => {
+    return new Promise((resolve, reject) => {
+        const destPath = path.join(__dirname, `../cron-atn/data/atnData.json`)
+        const params = { Bucket: process.env.ATN_S3_BUCKET, Key: process.env.ATN_S3_FILENAME}
+        s3.getObject(params)
+          .createReadStream()
+          .pipe(fs.createWriteStream(destPath))
+          .on('close', () => {
+            console.log(`File Successfully downloaded at: ${destPath}`);
+            resolve(destPath)
+          })
+      })
+}
+
+const getAtnDataFromTag = (arrData) => {
+    const transformedData = [];
+
+    arrData.forEach(element => {
+        transformedData.push({
+            timestamp: moment(element[0]).format('MM/DD/YYYY h:mm a'),
+            reading: element[1]
+        })
+    });
+
+    return transformedData;
+}
+
+internals.atnTransformData = async (atnData) => {
+    
+    let transformedData = [];
+    
+    atnData.forEach(tag => {
+        transformedData.push({
+            label: tag.label,
+            data: getAtnDataFromTag(tag.data)
+        })
+    });
+
+    return transformedData;
+}
+
 
 //saturas
 internals.saturasDownloadFileFromS3 = async (fileName) => {
