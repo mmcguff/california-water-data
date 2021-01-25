@@ -10,9 +10,8 @@ const private = {};
 
 private.getSessionCookieFromLogin = async () => {
     const browser = await puppeteer.launch({ 
-        headless: false,
+        headless: true,
         defaultViewport: { width: 1920, height: 937 },
-        devtools: true,
         args: ['--no-sandbox'] 
         });
     
