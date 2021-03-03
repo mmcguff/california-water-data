@@ -335,5 +335,14 @@ app.get('/saturas/:location/:type', saturasGetTargetDataFromLocation, async(req,
     });  
 })
 
+app.get('/atn', async(req, res) => {
+    const data = await utils.atnDownloadFileFromS3();
+    fs.readFile(path.join(__dirname, `./cron-atn/data/atnData.json`),async  (err, data) => {
+        if (err) throw err;
+        const transformedData = await utils.atnTransformData(JSON.parse(data));
+        res.send(transformedData);
+    }); 
+});
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Listening on port ${port}...`));
