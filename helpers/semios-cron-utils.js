@@ -22,7 +22,7 @@ const _getXToken = async (days) => {
             __typename
           }
         }`,
-            variables: {"data":{"email":"nathan@waterlabsag.com","password":"Naaz0223"}}
+            variables: {"data":{"email":process.env.SEMIOS_USERNAME,"password":process.env.SEMIOS_PASSWORD}}
           })
     };
     await fetch(url, options)
