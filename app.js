@@ -346,13 +346,10 @@ app.get('/atn', async(req, res) => {
 });
 
 
-app.get('/semios/:type', async(req, res) => {
+app.get('/semios/:type/:days', async(req, res) => {
     const type = req.params.type || 'soil';
-
-    //Today we default to number of days we want to get back.
-    //In the future lets give the use control of this. 
-
-    const payload = type === 'irrigation' ? await semios.getIrrigation() : await semios.getSoilMositure()
+    const days = req.params.days || 30;
+    const payload = type === 'irrigation' ? await semios.getIrrigation(days) : await semios.getSoilMositure(days)
     res.send(payload);
 });
 

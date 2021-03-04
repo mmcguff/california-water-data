@@ -1,10 +1,12 @@
 const emoji = require('node-emoji');
 const fetch = require('node-fetch');
+const moment = require('moment'); 
+moment().format(); 
 
 const public = {};
 const url = process.env.SEMIOS_GRAPHQL_ENDPOINT; 
 
-const _getXToken = async () => {
+const _getXToken = async (days) => {
 
     let xToken;
     
@@ -32,7 +34,7 @@ const _getXToken = async () => {
     return xToken;
 }
 
-public.getSoilMositure = async() => {
+public.getSoilMositure = async(numberOfDaysBack) => {
     console.log('...getting soil mositure')
     const xToken = await _getXToken();
     const options = {
@@ -97,8 +99,8 @@ public.getSoilMositure = async() => {
             variables: {
                 "propertyId": 50645,
                 "geom": "0101000020E61000006049A8CFC4915EC013F3ACA415A54340",
-                "dateFrom": "2021-02-02T08:00:00.000Z",
-                "dateTo": "2021-03-05T07:59:59.999Z",
+                "dateFrom": moment().subtract(numberOfDaysBack, 'days'),
+                "dateTo": moment(),
             }
           })
     };
@@ -112,7 +114,7 @@ public.getSoilMositure = async() => {
     return data;
 }
 
-public.getIrrigation = async() => {
+public.getIrrigation = async(numberOfDaysBack) => {
     console.log('...getting irrigation')
     const xToken = await _getXToken();
     const options = {
@@ -154,8 +156,8 @@ public.getIrrigation = async() => {
               }`,
             variables: {
                 "propertyId": 50645,
-                "dateFrom": "2021-02-02T08:00:00.000Z",
-                "dateTo": "2021-03-05T07:59:59.999Z",
+                "dateFrom": moment().subtract(numberOfDaysBack, 'days'),
+                "dateTo": moment(),
             }
           })
     };
