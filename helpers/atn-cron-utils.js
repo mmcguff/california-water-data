@@ -6,9 +6,9 @@ const s3 = new AWS.S3({
 });
 const emoji = require('node-emoji');
 
-const private = {};
+const public = {};
 
-private.getSessionCookieFromLogin = async () => {
+public.getSessionCookieFromLogin = async () => {
     const browser = await puppeteer.launch({args: ['--no-sandbox']});
     const [page] = await browser.pages();
     await page.goto(process.env.ATN_URL);
@@ -23,11 +23,11 @@ private.getSessionCookieFromLogin = async () => {
     return cookie; 
 };
 
-private.navigateToTargetData = async (page) => {
+public.navigateToTargetData = async (page) => {
     await page.click('#viewData-image')
 }
 
-private.uploadDataToS3 = (data, nameOfFile) => {
+public.uploadDataToS3 = (data, nameOfFile) => {
     const params = {
         Bucket: 'atn-json-data',
         Key: `${nameOfFile}.json`,
@@ -40,4 +40,4 @@ private.uploadDataToS3 = (data, nameOfFile) => {
       });
 }
 
-module.exports = private;
+module.exports = public;

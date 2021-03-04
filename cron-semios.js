@@ -7,4 +7,6 @@ const emoji = require('node-emoji');
 
 (async () => {
     console.log(`...${emoji.get('tulip')} Semios Cron Start`)
+    const xToken = await semios.getXtokenFromLogin();
+    console.log(xToken);
 })();
