@@ -11,6 +11,8 @@
     "cron:saturas:prod": "node cron-saturas.js",
     "cron:atn:local": "node -r dotenv/config cron-atn.js",
     "cron:atn:prod": "node cron-atn.js",
+    "cron:semios:local": "node -r dotenv/config cron-semios.js",
+    "cron:semios:prod": "node cron-semios.js",
     "devtest:local": "node -r dotenv/config dev.js"
   },
   "author": "Matthew McGuff",

@@ -29,6 +29,7 @@ const saturasGetTargetDataFromLocation = require('./middleware/saturasGetTargetD
 
 //custom utlis
 const utils = require('./helpers/utils');
+const semios = require('./helpers/semios-cron-utils');
 
 //Swagger Configs
 const swaggerJSDoc = require('swagger-jsdoc');
@@ -342,6 +343,14 @@ app.get('/atn', async(req, res) => {
         const transformedData = await utils.atnTransformData(JSON.parse(data));
         res.send(transformedData);
     }); 
+});
+
+
+app.get('/semios/:type/:days', async(req, res) => {
+    const type = req.params.type || 'soil';
+    const days = req.params.days || 30;
+    const payload = type === 'irrigation' ? await semios.getIrrigation(days) : await semios.getSoilMositure(days)
+    res.send(payload);
 });
 
 const port = process.env.PORT || 3000;
