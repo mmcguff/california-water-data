@@ -346,10 +346,21 @@ app.get('/atn', async(req, res) => {
 });
 
 
-app.get('/semios/:type/:days', async(req, res) => {
+app.get('/semios/:type/:station/:days', async(req, res) => {
     const type = req.params.type || 'soil';
+    const station = type !== 'soil' ? 'all' : req.params.station || 'all';
     const days = req.params.days || 30;
-    const payload = type === 'irrigation' ? await semios.getIrrigation(days) : await semios.getSoilMositure(days)
+
+    const isStationValid = station.match(/^(block-1-north|block-1-south|block-2-north|block-2-south|block-3-north|block-3-south|block-4-north|block-4-south|block-5|block-6|block-7|block-9|block-12)$/) !== null ? true : false; 
+
+    if(!isStationValid && type === 'soil'){
+       return res.status(400).send({
+           error: "Invalid Station",
+           message: `Station: "${station}" is invalid for soil mositure data.  Valid values include block-1-north|block-1-south|block-2-north|block-2-south|block-3-north|block-3-south|block-4-north|block-4-south|block-5|block-6|block-7|block-9|block-12 ` 
+       })
+    }
+    
+    const payload = type === 'irrigation' ? await semios.getIrrigation(days) : await semios.getSoilMositure(days, station)
     res.send(payload);
 });
 

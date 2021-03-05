@@ -1,6 +1,8 @@
 const emoji = require('node-emoji');
 const fetch = require('node-fetch');
 const moment = require('moment'); 
+const { setWith } = require('lodash');
+const { stat } = require('fs');
 moment().format(); 
 
 const public = {};
@@ -34,8 +36,56 @@ const _getXToken = async (days) => {
     return xToken;
 }
 
-public.getSoilMositure = async(numberOfDaysBack) => {
-    console.log('...getting soil mositure')
+const _getStationGeom = (station) => {
+  let geom;
+  switch (station) {
+    case 'block-1-north':
+      geom = '0101000020E61000006049A8CFC4915EC013F3ACA415A54340';
+      break;
+    case 'block-1-south':
+      geom = '0101000020E6100000E2DC7069C6915EC05C83088211A44340';
+      break;
+    case 'block-2-north':
+      geom = '0101000020E61000000C7E761BAF915EC072DF6A9DB8A64340';
+      break;
+    case 'block-2-south':
+      geom = '0101000020E61000004BB43FABA7915EC02FE9DE7998A54340';
+      break;
+    case 'block-3-north':
+      geom = '0101000020E610000086D3388A62915EC08ADE4EC708A54340';
+      break;
+    case 'block-3-south':
+      geom = '0101000020E6100000ACCA19E574915EC0FE7854A126A44340';
+      break;
+    case 'block-4-north':
+      geom = '0101000020E610000058BCA2A53C915EC0EFA42A12B8A64340';
+      break;
+    case 'block-4-south':
+      geom = '0101000020E61000004CDD3AA43D915EC0187F36CD96A54340';
+      break;
+    case 'block-5':
+      geom = '0101000020E6100000BDB09014EC905EC0CFB9803C60A54340';
+      break;
+    case 'block-6':
+      geom = '0101000020E6100000CF83BBB3F6905EC09265773705A54340';
+      break;
+    case 'block-7':
+      geom = '0101000020E610000067B04E3A36915EC0884F954AD3A34340';
+      break;
+    case 'block-9':
+      geom = '0101000020E6100000FBE362B172915EC0DC137F6F2EA34340';
+      break;
+    case 'block-12':
+      geom = '0101000020E61000007542435ABE915EC0963FDF162CA34340';
+      break;
+    default:
+      geom = '';
+  }
+
+  return geom;
+};
+
+public.getSoilMositure = async(numberOfDaysBack, station) => {
     const xToken = await _getXToken();
     const options = {
         method: 'POST',
@@ -98,7 +148,7 @@ public.getSoilMositure = async(numberOfDaysBack) => {
               `,
             variables: {
                 "propertyId": 50645,
-                "geom": "0101000020E61000006049A8CFC4915EC013F3ACA415A54340",
+                "geom": _getStationGeom(station),
                 "dateFrom": moment().subtract(numberOfDaysBack, 'days'),
                 "dateTo": moment(),
             }
@@ -115,7 +165,6 @@ public.getSoilMositure = async(numberOfDaysBack) => {
 }
 
 public.getIrrigation = async(numberOfDaysBack) => {
-    console.log('...getting irrigation')
     const xToken = await _getXToken();
     const options = {
         method: 'POST',
