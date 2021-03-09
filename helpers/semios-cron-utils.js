@@ -1,8 +1,7 @@
 const emoji = require('node-emoji');
 const fetch = require('node-fetch');
 const moment = require('moment'); 
-const { setWith } = require('lodash');
-const { stat } = require('fs');
+const _ = require('lodash');
 moment().format(); 
 
 const public = {};
@@ -85,6 +84,62 @@ const _getStationGeom = (station) => {
   return geom;
 };
 
+const _getRealStationName = (station) => {
+  let name;
+  switch (station) {
+    case 'block-1-north':
+      name = 'Block 1 North';
+      break;
+    case 'block-1-south':
+      name = 'Block 1 South';
+      break;
+    case 'block-2-north':
+      name = 'Block 2 North';
+      break;
+    case 'block-2-south':
+      name = 'Block 2 South';
+      break;
+    case 'block-3-north':
+      name = 'Block 3 North';
+      break;
+    case 'block-3-south':
+      name = 'Block 3 South';
+      break;
+    case 'block-4-north':
+      name = 'Block 4 North';
+      break;
+    case 'block-4-south':
+      name = 'Block 4 South';
+      break;
+    case 'block-5':
+      name = 'Block 5';
+      break;
+    case 'block-6':
+      name = 'Block 6';
+      break;
+    case 'block-7':
+      name = 'Block 7';
+      break;
+    case 'block-9':
+      name = 'Block 9';
+      break;
+    case 'block-12':
+      name = 'Block 12';
+      break;
+    default:
+      name = 'Block 1 North';
+  }
+  return name;
+}
+
+const _filterAndTransformIrrigationData = (rawData, station) => {
+  const stationName = _getRealStationName(station);
+  const data = rawData.data.user.properties[0].irrigationActivityStations;
+  const stationData = _.filter(data, {name: stationName});
+  return stationData;
+
+}; 
+
 public.getSoilMositure = async(numberOfDaysBack, station) => {
     const xToken = await _getXToken();
     const options = {
@@ -164,7 +219,7 @@ public.getSoilMositure = async(numberOfDaysBack, station) => {
     return data;
 }
 
-public.getIrrigation = async(numberOfDaysBack) => {
+public.getIrrigation = async(numberOfDaysBack, station) => {
     const xToken = await _getXToken();
     const options = {
         method: 'POST',
@@ -214,7 +269,7 @@ public.getIrrigation = async(numberOfDaysBack) => {
     await fetch(url, options)
     .then(response => response.json())
     .then(payload => {
-      data = payload;  
+      data = _filterAndTransformIrrigationData(payload, station);  
     })
     return data;
 }
